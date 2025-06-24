@@ -1,19 +1,14 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Set your backend IP address and port here
-// Example: 'http://192.168.1.10:6000'
-export const API_BASE_URL = 'http://192.168.253.142:3000';
+const API_BASE_URL = 'http://192.168.185.184:3000';
 
-// Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // You can add headers or other config here
 });
 
-// Add a request interceptor to add auth token
+// Attach token to every request
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('token');
@@ -22,22 +17,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Add a response interceptor to handle errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized error (e.g., redirect to login)
-      AsyncStorage.removeItem('token');
-      AsyncStorage.removeItem('user');
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api;
+export default api; 

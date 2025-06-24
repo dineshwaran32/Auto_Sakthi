@@ -1,4 +1,7 @@
 require('dotenv').config();
+// console.log('📊 Environment:', process.env.NODE_ENV);
+// console.log('🔗 MongoDB URI:', process.env.MONGODB_URI ? process.env.MONGODB_URI.replace(/:\/\/.*:(.*)@/, '://<user>:<password>@') : 'undefined');
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -33,7 +36,7 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 const corsOptions = {
-  origin: ['http://localhost:8081', 'http://192.168.1.10:8081'], // Allow RN dev server & emulator
+  origin: "*", // Allow RN dev server & emulator
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,

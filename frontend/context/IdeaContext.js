@@ -47,7 +47,7 @@ export const IdeaProvider = ({ children }) => {
   const loadIdeas = async () => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const res = await api.get('http://192.168.253.142:3000/api/ideas');
+      const res = await api.get('http://192.168.185.184:3000/api/ideas');
       dispatch({ type: 'SET_IDEAS', payload: res.data.data.ideas });
     } catch (error) {
       console.error('Error loading ideas:', error);
@@ -58,7 +58,7 @@ export const IdeaProvider = ({ children }) => {
 
   const submitIdea = async (ideaData) => {
     try {
-      const res = await api.post('http://192.168.253.142:3000/api/ideas', ideaData);
+      const res = await api.post('http://192.168.185.184:3000/api/ideas', ideaData);
       await loadIdeas();
       return res.data.data.idea;
     } catch (error) {
@@ -69,7 +69,7 @@ export const IdeaProvider = ({ children }) => {
 
   const updateIdeaStatus = async (ideaId, statusData) => {
     try {
-      const res = await api.put(`http://192.168.253.142:3000/api/ideas/${ideaId}/status`, statusData);
+      const res = await api.put(`http://192.168.185.184:3000/api/ideas/${ideaId}/status`, statusData);
       dispatch({ type: 'UPDATE_IDEA', payload: res.data.data.idea });
       return res.data.data.idea;
     } catch (error) {
@@ -80,7 +80,7 @@ export const IdeaProvider = ({ children }) => {
 
   const editIdea = async (ideaId, updatedData) => {
     try {
-      const res = await api.put(`http://192.168.253.142:3000/api/ideas/${ideaId}`, updatedData);
+      const res = await api.put(`http://192.168.185.184:3000/api/ideas/${ideaId}`, updatedData);
       await loadIdeas();
       return res.data.data.idea;
     } catch (error) {
@@ -91,7 +91,7 @@ export const IdeaProvider = ({ children }) => {
 
   const deleteIdea = async (ideaId) => {
     try {
-      await api.delete(`http://192.168.253.142:3000/api/ideas/${ideaId}`);
+      await api.delete(`http://192.168.185.184:3000/api/ideas/${ideaId}`);
       await loadIdeas();
     } catch (error) {
       console.error('Error deleting idea:', error);

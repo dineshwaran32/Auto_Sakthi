@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+// import { APP_BASE_URL } from '../.env';
 import {
   View,
   StyleSheet,
@@ -20,12 +21,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '../context/UserContext';
 import { theme, spacing } from '../utils/theme';
 import api from '../utils/api';
+import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
   const [employeeNumber, setEmployeeNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useUser();
+  const router = useRouter();
 
   const handleLogin = async () => {
     if (!employeeNumber || !otp) {
@@ -37,7 +40,7 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      const response = await api.post('http://192.168.253.142:3000/api/auth/login', {
+      const response = await api.post("http://192.168.185.184:3000/api/auth/login", {
         employeeNumber,
         otp,
       });
@@ -46,6 +49,13 @@ export default function LoginScreen() {
 
       if (response.data.success) {
         await login(response.data);
+        const user = response.data.user;
+        // Redirect based on role
+        if (user && user.role === 'admin') {
+          router.replace('/adminDashboard');
+        } else {
+          router.replace('/(tabs)/index'); // or your default user page
+        }
       } else {
         Alert.alert('Error', response.data.message || 'Login failed');
       }

@@ -56,9 +56,10 @@ export const UserProvider = ({ children }) => {
   const login = async (loginResponse) => {
     try {
       const { token, user } = loginResponse.data;
-      await AsyncStorage.setItem('user', JSON.stringify(user));
+      const userWithToken = { ...user, token };
+      await AsyncStorage.setItem('user', JSON.stringify(userWithToken));
       await AsyncStorage.setItem('token', token);
-      dispatch({ type: 'LOGIN', payload: user });
+      dispatch({ type: 'LOGIN', payload: userWithToken });
       return true;
     } catch (error) {
       console.error('Login error:', error);

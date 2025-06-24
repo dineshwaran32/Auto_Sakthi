@@ -5,7 +5,7 @@ import { useUser } from '../../context/UserContext';
 import LoginScreen from '../login';
 
 export default function TabLayout() {
-  const { isAuthenticated, loading } = useUser();
+  const { isAuthenticated, loading, user } = useUser();
 
   if (loading) {
     return null;
@@ -14,6 +14,8 @@ export default function TabLayout() {
   if (!isAuthenticated) {
     return <LoginScreen />;
   }
+
+  const isAdmin = user && user.role === 'admin';
 
   return (
     <Tabs
@@ -27,33 +29,6 @@ export default function TabLayout() {
           borderTopColor: '#E0E0E0',
         },
       }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ size, color }) => (
-            <MaterialIcons name="home" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="submit"
-        options={{
-          title: 'Submit Idea',
-          tabBarIcon: ({ size, color }) => (
-            <MaterialIcons name="add-circle" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="tracker"
-        options={{
-          title: 'My Ideas',
-          tabBarIcon: ({ size, color }) => (
-            <MaterialIcons name="track-changes" size={size} color={color} />
-          ),
-        }}
-      />
       <Tabs.Screen
         name="leaderboard"
         options={{
@@ -72,6 +47,47 @@ export default function TabLayout() {
           ),
         }}
       />
+      {isAdmin ? (
+        <Tabs.Screen
+          name="adminDashboard"
+          options={{
+            title: 'Admin',
+            tabBarIcon: ({ size, color }) => (
+              <MaterialIcons name="admin-panel-settings" size={size} color={color} />
+            ),
+          }}
+        />
+      ) : (
+        <>
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: 'Home',
+              tabBarIcon: ({ size, color }) => (
+                <MaterialIcons name="home" size={size} color={color} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="submit"
+            options={{
+              title: 'Submit Idea',
+              tabBarIcon: ({ size, color }) => (
+                <MaterialIcons name="add-circle" size={size} color={color} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="tracker"
+            options={{
+              title: 'My Ideas',
+              tabBarIcon: ({ size, color }) => (
+                <MaterialIcons name="track-changes" size={size} color={color} />
+              ),
+            }}
+          />
+        </>
+      )}
       <Tabs.Screen
         name="profile"
         options={{

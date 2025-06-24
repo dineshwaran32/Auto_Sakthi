@@ -1,4 +1,3 @@
-require('dotenv').config({ path: '../../.env' });
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
@@ -33,6 +32,6 @@ const connectDB = async () => {
   }
 };
 
-//connectDB();
+// connectDB();
 
 module.exports = connectDB;

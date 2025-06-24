@@ -219,7 +219,7 @@ export default function ProfileScreen() {
             <List.Item
               title="Employee Number"
               description={user.employeeNumber}
-              left={props => <List.Icon {...props} icon="badge" />}
+              left={props => <List.Icon {...props} icon="card-account-details" />}
             />
             <Divider />
             
@@ -248,7 +248,7 @@ export default function ProfileScreen() {
             <List.Item
               title="Notifications"
               description="Manage your notification preferences"
-              left={props => <List.Icon {...props} icon="notifications" />}
+              left={props => <List.Icon {...props} icon="bell" />}
               right={props => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => Alert.alert('Coming Soon', 'Notification settings will be available in the next update.')}
             />
@@ -257,7 +257,7 @@ export default function ProfileScreen() {
             <List.Item
               title="Privacy"
               description="Privacy and data settings"
-              left={props => <List.Icon {...props} icon="privacy-tip" />}
+              left={props => <List.Icon {...props} icon="shield-account" />}
               right={props => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => Alert.alert('Coming Soon', 'Privacy settings will be available in the next update.')}
             />
