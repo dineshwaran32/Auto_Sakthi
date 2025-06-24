@@ -91,8 +91,17 @@ export const IdeaProvider = ({ children }) => {
 
   const deleteIdea = async (ideaId) => {
     try {
-      await api.delete(`http://192.168.185.184:3000/api/ideas/${ideaId}`);
-      await loadIdeas();
+      const response = await api.delete(`http://192.168.185.184:3000/api/ideas/${ideaId}`);
+      
+      if (response.data.success) {
+        // Remove the deleted idea from the local state immediately
+        dispatch({ 
+          type: 'SET_IDEAS', 
+          payload: state.ideas.filter(idea => idea._id !== ideaId) 
+        });
+      } else {
+        throw new Error(response.data.message || 'Failed to delete idea');
+      }
     } catch (error) {
       console.error('Error deleting idea:', error);
       throw error;

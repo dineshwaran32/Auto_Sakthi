@@ -30,6 +30,33 @@ export default function TabLayout() {
         },
       }}>
       <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ size, color }) => (
+            <MaterialIcons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="submit"
+        options={{
+          title: 'Submit Idea',
+          tabBarIcon: ({ size, color }) => (
+            <MaterialIcons name="add-circle" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tracker"
+        options={{
+          title: 'My Ideas',
+          tabBarIcon: ({ size, color }) => (
+            <MaterialIcons name="track-changes" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="leaderboard"
         options={{
           title: 'Leaderboard',
@@ -47,47 +74,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      {isAdmin ? (
-        <Tabs.Screen
-          name="adminDashboard"
-          options={{
-            title: 'Admin',
-            tabBarIcon: ({ size, color }) => (
-              <MaterialIcons name="admin-panel-settings" size={size} color={color} />
-            ),
-          }}
-        />
-      ) : (
-        <>
-          <Tabs.Screen
-            name="index"
-            options={{
-              title: 'Home',
-              tabBarIcon: ({ size, color }) => (
-                <MaterialIcons name="home" size={size} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="submit"
-            options={{
-              title: 'Submit Idea',
-              tabBarIcon: ({ size, color }) => (
-                <MaterialIcons name="add-circle" size={size} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="tracker"
-            options={{
-              title: 'My Ideas',
-              tabBarIcon: ({ size, color }) => (
-                <MaterialIcons name="track-changes" size={size} color={color} />
-              ),
-            }}
-          />
-        </>
-      )}
       <Tabs.Screen
         name="profile"
         options={{
@@ -97,6 +83,17 @@ export default function TabLayout() {
           ),
         }}
       />
+      {isAdmin && (
+        <Tabs.Screen
+          name="adminDashboard"
+          options={{
+            title: 'Admin',
+            tabBarIcon: ({ size, color }) => (
+              <MaterialIcons name="admin-panel-settings" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
     </Tabs>
   );
 }

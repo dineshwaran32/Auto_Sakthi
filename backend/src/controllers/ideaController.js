@@ -60,7 +60,7 @@ const getIdeas = async (req, res) => {
       search 
     } = req.query;
 
-    const filter = {};
+    const filter = { isActive: { $ne: false } };
     
     if (status) filter.status = status;
     if (department) filter.department = department;
@@ -110,7 +110,7 @@ const getMyIdeas = async (req, res) => {
   try {
     const { page = 1, limit = 10, status } = req.query;
     
-    const filter = { submittedBy: req.user._id };
+    const filter = { submittedBy: req.user._id, isActive: { $ne: false } };
     if (status) filter.status = status;
 
     const ideas = await Idea.find(filter)
@@ -145,7 +145,10 @@ const getMyIdeas = async (req, res) => {
 
 const getIdeaById = async (req, res) => {
   try {
-    const idea = await Idea.findById(req.params.id)
+    const idea = await Idea.findOne({ 
+      _id: req.params.id, 
+      isActive: { $ne: false } 
+    })
       .populate('submittedBy', 'name employeeNumber department designation')
       .populate('reviewedBy', 'name employeeNumber');
 

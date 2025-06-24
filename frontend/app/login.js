@@ -46,15 +46,20 @@ export default function LoginScreen() {
       });
 
       console.log('Login response:', response.data);
+      console.log("Response data user :", response.data.data);
 
       if (response.data.success) {
-        await login(response.data);
-        const user = response.data.user;
-        // Redirect based on role
-        if (user && user.role === 'admin') {
-          router.replace('/adminDashboard');
+        const loginSuccess = await login(response.data);
+        if (loginSuccess) {
+          const user = response.data.data.user;
+          // Redirect based on role
+          if (user && user.role === 'admin') {
+            router.replace('/adminDashboard');
+          } else {
+            router.replace('/(tabs)'); // Navigate to tabs root
+          }
         } else {
-          router.replace('/(tabs)/index'); // or your default user page
+          Alert.alert('Error', 'Failed to save login data');
         }
       } else {
         Alert.alert('Error', response.data.message || 'Login failed');

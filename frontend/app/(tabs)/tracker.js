@@ -4,6 +4,7 @@ import {
   StyleSheet,
   ScrollView,
   FlatList,
+  Alert,
 } from 'react-native';
 import {
   Text,
@@ -137,8 +138,15 @@ export default function TrackerScreen() {
     try {
       await deleteIdea(deleteIdeaId);
       setDeleteDialogVisible(false);
-    } catch (e) {
-      // Optionally show error
+      setDeleteIdeaId(null);
+      // Optionally show success message
+      Alert.alert('Success', 'Idea deleted successfully');
+    } catch (error) {
+      console.error('Delete error:', error);
+      Alert.alert(
+        'Error', 
+        error.response?.data?.message || 'Failed to delete idea. Please try again.'
+      );
     } finally {
       setDeleteLoading(false);
     }

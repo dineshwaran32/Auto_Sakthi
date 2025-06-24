@@ -55,14 +55,33 @@ export const UserProvider = ({ children }) => {
 
   const login = async (loginResponse) => {
     try {
+      console.log('UserContext login - Full response:', loginResponse);
+      console.log('UserContext login - response.data:', loginResponse.data);
+      console.log('UserContext login - response.data.data:', loginResponse.data.data);
+      
       const { token, user } = loginResponse.data;
+      console.log('UserContext login - Extracted token:', token);
+      console.log('UserContext login - Extracted user:', user);
+      
+      if (!token || !user) {
+        console.error('UserContext login - Missing token or user data');
+        return false;
+      }
+      
       const userWithToken = { ...user, token };
+      console.log('UserContext login - User with token:', userWithToken);
+      
       await AsyncStorage.setItem('user', JSON.stringify(userWithToken));
       await AsyncStorage.setItem('token', token);
       dispatch({ type: 'LOGIN', payload: userWithToken });
+      console.log('UserContext login - Successfully saved and dispatched');
       return true;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('UserContext login error:', error);
+      console.error('UserContext login error details:', {
+        message: error.message,
+        stack: error.stack
+      });
       return false;
     }
   };
