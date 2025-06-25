@@ -225,7 +225,6 @@ export default function ImplementedScreen() {
               mode="outlined"
               onPress={() => setMenuVisible(true)}
               style={styles.filterButton}
-              icon="filter-list"
             >
               {DEPARTMENT_FILTERS.find(f => f.value === departmentFilter)?.label}
             </Button>

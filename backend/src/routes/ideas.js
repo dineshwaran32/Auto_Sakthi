@@ -29,25 +29,10 @@ router.get('/', auth, getIdeas);
 // @access  Private
 router.get('/my', auth, getMyIdeas);
 
-// @route   GET /api/ideas/stats
-// @desc    Get idea statistics
-// @access  Private (Admin/Reviewer)
-router.get('/stats', auth, authorize('admin', 'reviewer'), getIdeaStats);
-
 // @route   GET /api/ideas/:id
 // @desc    Get idea by ID
 // @access  Private
 router.get('/:id', auth, getIdeaById);
-
-// @route   PUT /api/ideas/:id/status
-// @desc    Update idea status
-// @access  Private (Admin/Reviewer)
-router.put('/:id/status', 
-  auth, 
-  authorize('admin', 'reviewer'), 
-  validateRequest(schemas.updateIdeaStatus), 
-  updateIdeaStatus
-);
 
 // @route   PUT /api/ideas/:id
 // @desc    Update an idea (edit)

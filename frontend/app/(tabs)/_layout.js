@@ -83,17 +83,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      {isAdmin && (
-        <Tabs.Screen
-          name="adminDashboard"
-          options={{
-            title: 'Admin',
-            tabBarIcon: ({ size, color }) => (
-              <MaterialIcons name="admin-panel-settings" size={size} color={color} />
-            ),
-          }}
-        />
-      )}
     </Tabs>
   );
 }

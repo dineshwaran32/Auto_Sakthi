@@ -20,53 +20,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useUser } from '../../context/UserContext';
 import { useIdeas } from '../../context/IdeaContext';
 import { theme, spacing } from '../../utils/theme';
-
-const ACHIEVEMENT_BADGES = [
-  {
-    id: 'first_idea',
-    title: 'First Idea',
-    description: 'Submitted your first Kaizen idea',
-    icon: 'lightbulb',
-    color: theme.colors.tertiary,
-    condition: (userIdeas) => userIdeas.length >= 1,
-  },
-  {
-    id: 'five_ideas',
-    title: 'Idea Generator',
-    description: 'Submitted 5 improvement ideas',
-    icon: 'auto-awesome',
-    color: theme.colors.secondary,
-    condition: (userIdeas) => userIdeas.length >= 5,
-  },
-  {
-    id: 'ten_ideas',
-    title: 'Innovation Champion',
-    description: 'Submitted 10 improvement ideas',
-    icon: 'emoji-events',
-    color: theme.colors.primary,
-    condition: (userIdeas) => userIdeas.length >= 10,
-  },
-  {
-    id: 'first_approved',
-    title: 'Approved Contributor',
-    description: 'Had your first idea approved',
-    icon: 'check-circle',
-    color: theme.colors.success,
-    condition: (userIdeas) => userIdeas.some(idea => idea.status === 'approved'),
-  },
-  {
-    id: 'first_implemented',
-    title: 'Change Maker',
-    description: 'Had your first idea implemented',
-    icon: 'build',
-    color: '#FF6F00',
-    condition: (userIdeas) => userIdeas.some(idea => idea.status === 'implementing'),
-  },
-];
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const { user, logout } = useUser();
   const { ideas } = useIdeas();
+  const router = useRouter();
 
   if (!user) return null;
 
@@ -74,17 +33,30 @@ export default function ProfileScreen() {
   const approvedIdeas = userIdeas.filter(idea => idea.status === 'approved');
   const implementedIdeas = userIdeas.filter(idea => idea.status === 'implementing');
   
-  const earnedBadges = ACHIEVEMENT_BADGES.filter(badge => badge.condition(userIdeas));
-  
   const handleLogout = () => {
-    Alert.alert(
-      'Confirm Logout',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', onPress: logout, style: 'destructive' },
-      ]
-    );
+    if (typeof window !== 'undefined') {
+      // Web: use window.confirm
+      if (window.confirm('Are you sure you want to sign out?')) {
+        logout().then(() => router.replace('/'));
+      }
+    } else {
+      // Native: use Alert
+      Alert.alert(
+        'Confirm Logout',
+        'Are you sure you want to sign out?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Sign Out', 
+            onPress: async () => {
+              await logout();
+              router.replace('/');
+            }, 
+            style: 'destructive' 
+          },
+        ]
+      );
+    }
   };
 
   const formatJoinDate = () => {
@@ -173,39 +145,20 @@ export default function ProfileScreen() {
           </Card.Content>
         </Card>
 
-        {/* Achievements */}
-        <Card style={styles.achievementsCard}>
+        {/* Credit Points */}
+        <Card style={styles.statsCard}>
           <Card.Content>
             <Text variant="titleLarge" style={styles.sectionTitle}>
-              Achievements
+              Credit Points
             </Text>
-            {earnedBadges.length > 0 ? (
-              <View style={styles.badgeGrid}>
-                {earnedBadges.map((badge) => (
-                  <Surface key={badge.id} style={[styles.badge, { backgroundColor: badge.color + '20' }]}>
-                    <MaterialIcons 
-                      name={badge.icon} 
-                      size={32} 
-                      color={badge.color} 
-                      style={styles.badgeIcon}
-                    />
-                    <Text variant="titleSmall" style={styles.badgeTitle}>
-                      {badge.title}
-                    </Text>
-                    <Text variant="bodySmall" style={styles.badgeDescription}>
-                      {badge.description}
-                    </Text>
-                  </Surface>
-                ))}
-              </View>
-            ) : (
-              <View style={styles.noBadges}>
-                <MaterialIcons name="emoji-events" size={48} color={theme.colors.onSurfaceVariant} />
-                <Text variant="bodyLarge" style={styles.noBadgesText}>
-                  Start submitting ideas to earn achievement badges!
-                </Text>
-              </View>
-            )}
+            <View style={{ alignItems: 'center', marginVertical: spacing.lg }}>
+              <Surface style={[styles.statIcon, { backgroundColor: theme.colors.secondaryContainer }]}> 
+                <MaterialIcons name="stars" size={32} color={theme.colors.secondary} />
+              </Surface>
+              <Text variant="displayMedium" style={{ fontWeight: 'bold', color: theme.colors.secondary, marginTop: spacing.md }}>
+                {user.creditPoints ?? 0}
+              </Text>
+            </View>
           </Card.Content>
         </Card>
 
@@ -353,44 +306,6 @@ const styles = StyleSheet.create({
   statLabel: {
     textAlign: 'center',
     color: theme.colors.onSurfaceVariant,
-  },
-  achievementsCard: {
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    elevation: 2,
-  },
-  badgeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-  },
-  badge: {
-    width: '48%',
-    padding: spacing.md,
-    borderRadius: 12,
-    alignItems: 'center',
-    elevation: 1,
-  },
-  badgeIcon: {
-    marginBottom: spacing.sm,
-  },
-  badgeTitle: {
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
-  badgeDescription: {
-    textAlign: 'center',
-    color: theme.colors.onSurfaceVariant,
-  },
-  noBadges: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-  },
-  noBadgesText: {
-    textAlign: 'center',
-    color: theme.colors.onSurfaceVariant,
-    marginTop: spacing.md,
   },
   detailsCard: {
     marginHorizontal: spacing.lg,

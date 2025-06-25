@@ -26,7 +26,6 @@ export default function RootLayout() {
           <IdeaProvider>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="adminDashboard" />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />

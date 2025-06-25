@@ -31,8 +31,12 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['employee', 'reviewer', 'admin'],
+    enum: ['employee', 'reviewer'],
     default: 'employee'
+  },
+  creditPoints: {
+    type: Number,
+    default: 0
   },
   isActive: {
     type: Boolean,
@@ -54,8 +58,8 @@ const userSchema = new mongoose.Schema({
 });
 
 // Index for better query performance
-userSchema.index({ employeeNumber: 1 });
-userSchema.index({ email: 1 });
+// userSchema.index({ employeeNumber: 1 });
+// userSchema.index({ email: 1 });
 userSchema.index({ department: 1 });
 
 // Virtual for user's full profile
@@ -67,7 +71,12 @@ userSchema.virtual('profile').get(function() {
     email: this.email,
     department: this.department,
     designation: this.designation,
-    role: this.role
+    role: this.role,
+    creditPoints: this.creditPoints,
+    isActive: this.isActive,
+    lastLogin: this.lastLogin,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt
   };
 });
 

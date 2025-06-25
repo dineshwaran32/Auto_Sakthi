@@ -1,4 +1,3 @@
-require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
 const User = require('../src/models/User');
 const Idea = require('../src/models/Idea');
@@ -6,7 +5,7 @@ const Notification = require('../src/models/Notification');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect("mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Kaizen_Idea?retryWrites=true&w=majority&appName=Cluster0");
     console.log('MongoDB Connected for seeding');
   } catch (error) {
     console.error('Database connection failed:', error);
@@ -31,14 +30,6 @@ const seedUsers = async () => {
       department: 'Quality',
       designation: 'Quality Manager',
       role: 'reviewer'
-    },
-    {
-      employeeNumber: '11111',
-      name: 'Admin User',
-      email: 'admin@company.com',
-      department: 'Management',
-      designation: 'Kaizen Coordinator',
-      role: 'admin'
     },
     {
       employeeNumber: '22222',
@@ -109,7 +100,7 @@ const seedIdeas = async (users) => {
       submittedBy: users.find(u => u.employeeNumber === '33333')._id,
       submittedByEmployeeNumber: '33333',
       status: 'implementing',
-      reviewedBy: users.find(u => u.employeeNumber === '11111')._id,
+      reviewedBy: users.find(u => u.employeeNumber === '67890')._id,
       reviewedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
       reviewComments: 'Approved for implementation. Safety is our priority.'
     },
@@ -137,7 +128,7 @@ const seedIdeas = async (users) => {
       submittedBy: users.find(u => u.employeeNumber === '33333')._id,
       submittedByEmployeeNumber: '33333',
       status: 'implemented',
-      reviewedBy: users.find(u => u.employeeNumber === '11111')._id,
+      reviewedBy: users.find(u => u.employeeNumber === '67890')._id,
       reviewedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       implementationDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
       actualSavings: 32000,
@@ -202,7 +193,6 @@ const seedDatabase = async () => {
     console.log('\n📋 Test Credentials:');
     console.log('Employee: 12345 | OTP: 1234');
     console.log('Reviewer: 67890 | OTP: 1234');
-    console.log('Admin: 11111 | OTP: 1234');
     
     process.exit(0);
   } catch (error) {
@@ -211,9 +201,31 @@ const seedDatabase = async () => {
   }
 };
 
-// Run seeding if this file is executed directly
+// Run seeding or recalculate if this file is executed directly
 if (require.main === module) {
-  seedDatabase();
+  const arg = process.argv[2];
+  if (arg === 'recalculate') {
+    recalculateAllUserCreditPoints();
+  } else {
+    seedDatabase();
+  }
 }
 
 module.exports = { seedDatabase };
+
+async function recalculateAllUserCreditPoints() {
+  await mongoose.connect("mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Kaizen_Idea?retryWrites=true&w=majority&appName=Cluster0"); 
+  const users = await User.find({});
+  for (const user of users) {
+    const ideas = await Idea.find({ submittedBy: user._id, isActive: { $ne: false } });
+    let submitted = ideas.length;
+    let approved = ideas.filter(i => i.status === 'approved').length;
+    let implemented = ideas.filter(i => i.status === 'implemented').length;
+    const creditPoints = (submitted * 10) + (approved * 20) + (implemented * 30);
+    user.creditPoints = creditPoints;
+    await user.save();
+    console.log(`Updated ${user.name} (${user.employeeNumber}): ${creditPoints} points`);
+  }
+  await mongoose.disconnect();
+  console.log('All user credit points recalculated.');
+}

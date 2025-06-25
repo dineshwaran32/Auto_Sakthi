@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   Dimensions,
+  Animated,
 } from 'react-native';
 import {
   Text,
@@ -13,6 +14,9 @@ import {
   Button,
   Avatar,
   Badge,
+  IconButton,
+  Portal,
+  Modal,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -20,6 +24,7 @@ import { useRouter } from 'expo-router';
 import { useUser } from '../../context/UserContext';
 import { useIdeas } from '../../context/IdeaContext';
 import { theme, spacing } from '../../utils/theme';
+import api from '../../utils/api';
 
 const { width } = Dimensions.get('window');
 
@@ -27,6 +32,61 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useUser();
   const { ideas } = useIdeas();
+
+  const [bellVisible, setBellVisible] = React.useState(false);
+  const slideAnim = React.useRef(new Animated.Value(350)).current; // panel width
+
+  // Notification state
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+
+  const fetchNotifications = async () => {
+    setLoadingNotifications(true);
+    try {
+      const res = await api.get('/api/notifications');
+      setNotifications(res.data.data.notifications);
+      setUnreadCount(res.data.data.unreadCount);
+    } catch (err) {
+      // Optionally handle error
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    if (bellVisible) fetchNotifications();
+  }, [bellVisible]);
+
+  const markAsRead = async (id) => {
+    try {
+      await api.put(`/api/notifications/${id}/read`);
+      fetchNotifications();
+    } catch (err) {}
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await api.put('/api/notifications/read-all');
+      fetchNotifications();
+    } catch (err) {}
+  };
+
+  const showBellPopup = () => {
+    setBellVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+  const hideBellPopup = () => {
+    Animated.timing(slideAnim, {
+      toValue: 350,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(() => setBellVisible(false));
+  };
 
   const userIdeas = ideas.filter(idea => idea.submittedBy?.employeeNumber === user?.employeeNumber);
   const approvedIdeas = userIdeas.filter(idea => idea.status === 'approved');
@@ -66,6 +126,44 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Side Notification Drawer */}
+      {bellVisible && (
+        <Animated.View style={[styles.bellDrawer, { right: slideAnim }]}> 
+          <View style={styles.bellDrawerHeader}>
+            <Text style={styles.bellDrawerTitle}>Notifications</Text>
+            <IconButton icon="close" size={24} onPress={hideBellPopup} />
+          </View>
+          <Button mode="text" onPress={markAllAsRead} disabled={unreadCount === 0}>
+            Mark all as read
+          </Button>
+          {loadingNotifications ? (
+            <Text>Loading...</Text>
+          ) : notifications.length === 0 ? (
+            <Text style={styles.bellDrawerText}>No notifications yet.</Text>
+          ) : (
+            <ScrollView style={{ width: '100%' }}>
+              {notifications.map((n) => (
+                <Card key={n._id} style={{ marginBottom: 8, backgroundColor: n.isRead ? '#f5f5f5' : '#e3f2fd' }}>
+                  <Card.Content>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontWeight: 'bold' }}>{n.title}</Text>
+                        <Paragraph>{n.message}</Paragraph>
+                        <Text style={{ fontSize: 12, color: '#888' }}>{new Date(n.createdAt).toLocaleString()}</Text>
+                      </View>
+                      {!n.isRead && (
+                        <Button mode="text" onPress={() => markAsRead(n._id)} compact>
+                          Mark as read
+                        </Button>
+                      )}
+                    </View>
+                  </Card.Content>
+                </Card>
+              ))}
+            </ScrollView>
+          )}
+        </Animated.View>
+      )}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Header */}
         <View style={styles.header}>
@@ -80,6 +178,17 @@ export default function HomeScreen() {
               <Paragraph style={styles.userRole}>
                 {user?.designation} • {user?.department}
               </Paragraph>
+            </View>
+            <View>
+              <IconButton
+                icon="bell"
+                size={28}
+                iconColor={theme.colors.primary}
+                onPress={showBellPopup}
+              />
+              {unreadCount > 0 && (
+                <Badge style={{ position: 'absolute', top: 2, right: 2 }}>{unreadCount}</Badge>
+              )}
             </View>
           </View>
         </View>
@@ -233,6 +342,7 @@ const styles = StyleSheet.create({
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   avatar: {
     backgroundColor: theme.colors.primary,
@@ -353,5 +463,40 @@ const styles = StyleSheet.create({
   },
   emptyButton: {
     marginTop: spacing.sm,
+  },
+  bellDrawer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 320,
+    backgroundColor: 'white',
+    elevation: 8,
+    zIndex: 100,
+    padding: spacing.lg,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+  },
+  bellDrawerHeader: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+  },
+  bellDrawerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: theme.colors.primary,
+  },
+  bellDrawerText: {
+    fontSize: 16,
+    color: theme.colors.onSurface,
+    marginTop: spacing.md,
   },
 });

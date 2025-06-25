@@ -76,7 +76,6 @@ npm start
    ```
    Employee: 12345 | OTP: 1234
    Reviewer: 67890 | OTP: 1234
-   Admin: 11111 | OTP: 1234
    ```
 
 2. Submit your first idea:
@@ -91,17 +90,6 @@ npm start
    - View detailed feedback from reviewers
 
 ### More Detailed Examples
-1. Managing Ideas (Reviewers/Admins):
-```javascript
-// Update idea status
-PUT /api/ideas/:id/status
-{
-  "status": "approved",
-  "reviewComments": "Great improvement suggestion!",
-  "actualSavings": 25000
-}
-```
-
 2. Viewing Statistics:
 ```javascript
 // Get idea statistics

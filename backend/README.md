@@ -118,18 +118,6 @@ GET /api/ideas/my?page=1&limit=10
 Authorization: Bearer <token>
 ```
 
-#### Update Idea Status (Admin/Reviewer only)
-```http
-PUT /api/ideas/:id/status
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "status": "approved",
-  "reviewComments": "Great idea! Approved for implementation."
-}
-```
-
 ### Users
 
 #### Get Leaderboard

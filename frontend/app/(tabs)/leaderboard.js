@@ -117,7 +117,6 @@ export default function LeaderboardScreen() {
           <Chip 
             mode="outlined" 
             style={styles.rankChip}
-            icon="emoji-events"
           >
             Your Rank: #{currentUserRank}
           </Chip>
@@ -131,12 +130,10 @@ export default function LeaderboardScreen() {
             {
               value: 'individual',
               label: 'Individual',
-              icon: 'person',
             },
             {
               value: 'department',
               label: 'Department',
-              icon: 'business',
             },
           ]}
         />

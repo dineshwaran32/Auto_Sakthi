@@ -1,6 +1,21 @@
 const Idea = require('../models/Idea');
 const User = require('../models/User');
-const Notification = require('../models/Notification');
+const NotificationService = require('../services/notificationService');
+
+// Helper to recalculate and update user's credit points
+async function recalculateUserCreditPoints(userId, reason, updater) {
+  const ideas = await Idea.find({ submittedBy: userId, isActive: { $ne: false } });
+  let submitted = ideas.length;
+  let approved = ideas.filter(i => i.status === 'approved').length;
+  let implemented = ideas.filter(i => i.status === 'implemented').length;
+  const oldUser = await User.findById(userId);
+  const oldPoints = oldUser.creditPoints || 0;
+  const creditPoints = (submitted * 10) + (approved * 20) + (implemented * 30);
+  await User.findByIdAndUpdate(userId, { creditPoints });
+  if (creditPoints !== oldPoints) {
+    await NotificationService.notifyCreditPointsUpdate(oldUser, oldPoints, creditPoints, reason || 'Points recalculated', updater);
+  }
+}
 
 const createIdea = async (req, res) => {
   try {
@@ -16,22 +31,11 @@ const createIdea = async (req, res) => {
     // Populate the submittedBy field
     await idea.populate('submittedBy', 'name employeeNumber department');
 
-    // Create notification for admins/reviewers
-    const adminsAndReviewers = await User.find({ 
-      role: { $in: ['admin', 'reviewer'] }, 
-      isActive: true 
-    });
+    // Recalculate credit points for the user
+    await recalculateUserCreditPoints(req.user._id, 'Idea submitted', req.user);
 
-    const notifications = adminsAndReviewers.map(user => ({
-      recipient: user._id,
-      recipientEmployeeNumber: user.employeeNumber,
-      type: 'idea_submitted',
-      title: 'New Idea Submitted',
-      message: `${req.user.name} submitted a new idea: "${idea.title}"`,
-      relatedIdea: idea._id
-    }));
-
-    await Notification.insertMany(notifications);
+    // Notify reviewers
+    await NotificationService.notifyIdeaSubmitted(idea, req.user);
 
     res.status(201).json({
       success: true,
@@ -198,17 +202,11 @@ const updateIdeaStatus = async (req, res) => {
     await idea.save();
     await idea.populate('submittedBy', 'name employeeNumber');
 
-    // Create notification for idea submitter
-    const notification = new Notification({
-      recipient: idea.submittedBy._id,
-      recipientEmployeeNumber: idea.submittedBy.employeeNumber,
-      type: `idea_${status}`,
-      title: `Idea ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-      message: `Your idea "${idea.title}" has been ${status}`,
-      relatedIdea: idea._id
-    });
+    // Recalculate credit points for the user
+    await recalculateUserCreditPoints(idea.submittedBy._id, `Idea status changed to ${status}`, req.user);
 
-    await notification.save();
+    // Notify submitter
+    await NotificationService.notifyIdeaStatusChange(idea, status, req.user);
 
     res.json({
       success: true,
@@ -290,6 +288,10 @@ const updateIdea = async (req, res) => {
     );
     if (!idea) {
       return res.status(404).json({ success: false, message: 'Idea not found or not authorized' });
+    }
+    // Notify submitter if someone else edits the idea
+    if (idea.submittedBy.toString() !== req.user._id.toString()) {
+      await NotificationService.notifyIdeaUpdated(idea, updates, req.user);
     }
     res.json({ success: true, message: 'Idea updated successfully', data: { idea } });
   } catch (error) {

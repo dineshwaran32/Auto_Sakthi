@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-// import { APP_BASE_URL } from '../.env';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -27,8 +26,14 @@ export default function LoginScreen() {
   const [employeeNumber, setEmployeeNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useUser();
+  const { login, isAuthenticated } = useUser();
   const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated]);
 
   const handleLogin = async () => {
     if (!employeeNumber || !otp) {
@@ -40,7 +45,7 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      const response = await api.post("http://192.168.185.184:3000/api/auth/login", {
+      const response = await api.post('/api/auth/login', {
         employeeNumber,
         otp,
       });
@@ -51,13 +56,7 @@ export default function LoginScreen() {
       if (response.data.success) {
         const loginSuccess = await login(response.data);
         if (loginSuccess) {
-          const user = response.data.data.user;
-          // Redirect based on role
-          if (user && user.role === 'admin') {
-            router.replace('/adminDashboard');
-          } else {
-            router.replace('/(tabs)'); // Navigate to tabs root
-          }
+          router.replace('/(tabs)'); // Navigate to tabs root for all users
         } else {
           Alert.alert('Error', 'Failed to save login data');
         }

@@ -33,6 +33,35 @@ const initialState = {
   loading: true,
 };
 
+// Utility to detect web vs native
+const isWeb = typeof window !== 'undefined' && window.localStorage;
+
+const storage = {
+  async getItem(key) {
+    if (isWeb) {
+      return Promise.resolve(window.localStorage.getItem(key));
+    } else {
+      return AsyncStorage.getItem(key);
+    }
+  },
+  async setItem(key, value) {
+    if (isWeb) {
+      window.localStorage.setItem(key, value);
+      return Promise.resolve();
+    } else {
+      return AsyncStorage.setItem(key, value);
+    }
+  },
+  async removeItem(key) {
+    if (isWeb) {
+      window.localStorage.removeItem(key);
+      return Promise.resolve();
+    } else {
+      return AsyncStorage.removeItem(key);
+    }
+  }
+};
+
 export const UserProvider = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, initialState);
 
@@ -42,7 +71,7 @@ export const UserProvider = ({ children }) => {
 
   const checkAuthState = async () => {
     try {
-      const userData = await AsyncStorage.getItem('user');
+      const userData = await storage.getItem('user');
       if (userData) {
         dispatch({ type: 'LOGIN', payload: JSON.parse(userData) });
       }
@@ -71,8 +100,8 @@ export const UserProvider = ({ children }) => {
       const userWithToken = { ...user, token };
       console.log('UserContext login - User with token:', userWithToken);
       
-      await AsyncStorage.setItem('user', JSON.stringify(userWithToken));
-      await AsyncStorage.setItem('token', token);
+      await storage.setItem('user', JSON.stringify(userWithToken));
+      await storage.setItem('token', token);
       dispatch({ type: 'LOGIN', payload: userWithToken });
       console.log('UserContext login - Successfully saved and dispatched');
       return true;
@@ -87,8 +116,11 @@ export const UserProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('user');
-    await AsyncStorage.removeItem('token');
+    if (isWeb) {
+      window.localStorage.clear(); // Clear all localStorage on web
+    } else {
+      await AsyncStorage.clear(); // Clear all AsyncStorage on native
+    }
     dispatch({ type: 'LOGOUT' });
   };
 

@@ -37,21 +37,10 @@ const STATUS_FILTERS = [
 
 export default function TrackerScreen() {
   const { user } = useUser();
-  const { ideas, editIdea, deleteIdea, loadIdeas } = useIdeas();
+  const { ideas, loadIdeas } = useIdeas();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [menuVisible, setMenuVisible] = useState(false);
-
-  // Edit modal state
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editIdeaData, setEditIdeaData] = useState(null);
-  const [editForm, setEditForm] = useState({ title: '', problem: '', benefit: '', estimatedSavings: '' });
-  const [editLoading, setEditLoading] = useState(false);
-
-  // Delete dialog state
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [deleteIdeaId, setDeleteIdeaId] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const userIdeas = ideas.filter(idea => idea.submittedBy?.employeeNumber === user?.employeeNumber);
   
@@ -96,60 +85,6 @@ export default function TrackerScreen() {
       month: 'short',
       day: 'numeric',
     });
-  };
-
-  const openEditModal = (idea) => {
-    setEditIdeaData(idea);
-    setEditForm({
-      title: idea.title,
-      problem: idea.problem,
-      benefit: idea.benefit,
-      estimatedSavings: idea.estimatedSavings ? String(idea.estimatedSavings) : '',
-    });
-    setEditModalVisible(true);
-  };
-
-  const handleEditChange = (field, value) => {
-    setEditForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleEditSubmit = async () => {
-    setEditLoading(true);
-    try {
-      await editIdea(editIdeaData._id, {
-        ...editForm,
-        estimatedSavings: editForm.estimatedSavings ? Number(editForm.estimatedSavings) : undefined,
-      });
-      setEditModalVisible(false);
-    } catch (e) {
-      // Optionally show error
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const openDeleteDialog = (ideaId) => {
-    setDeleteIdeaId(ideaId);
-    setDeleteDialogVisible(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    setDeleteLoading(true);
-    try {
-      await deleteIdea(deleteIdeaId);
-      setDeleteDialogVisible(false);
-      setDeleteIdeaId(null);
-      // Optionally show success message
-      Alert.alert('Success', 'Idea deleted successfully');
-    } catch (error) {
-      console.error('Delete error:', error);
-      Alert.alert(
-        'Error', 
-        error.response?.data?.message || 'Failed to delete idea. Please try again.'
-      );
-    } finally {
-      setDeleteLoading(false);
-    }
   };
 
   const renderIdeaCard = ({ item }) => (
@@ -216,15 +151,6 @@ export default function TrackerScreen() {
             </Text>
           </View>
         )}
-        {/* Edit & Delete Buttons */}
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
-          <Button mode="outlined" compact onPress={() => openEditModal(item)} style={{ marginRight: 8 }}>
-            Edit
-          </Button>
-          <Button mode="contained" compact buttonColor={theme.colors.error} textColor="#fff" onPress={() => openDeleteDialog(item._id)}>
-            Delete
-          </Button>
-        </View>
       </Card.Content>
     </Card>
   );
@@ -308,55 +234,6 @@ export default function TrackerScreen() {
             {renderEmptyState()}
           </ScrollView>
         )}
-        {/* Edit Modal */}
-        <Portal>
-          <Modal visible={editModalVisible} onDismiss={() => setEditModalVisible(false)} contentContainerStyle={{ backgroundColor: 'white', padding: 20, margin: 20, borderRadius: 8 }}>
-            <Text variant="titleMedium" style={{ marginBottom: 12 }}>Edit Idea</Text>
-            <Text>Title</Text>
-            <TextInput
-              value={editForm.title}
-              onChangeText={text => handleEditChange('title', text)}
-              style={{ marginBottom: 8, borderWidth: 1, borderColor: '#ccc', borderRadius: 4, padding: 8 }}
-            />
-            <Text>Problem</Text>
-            <TextInput
-              value={editForm.problem}
-              onChangeText={text => handleEditChange('problem', text)}
-              style={{ marginBottom: 8, borderWidth: 1, borderColor: '#ccc', borderRadius: 4, padding: 8 }}
-              multiline
-            />
-            <Text>Benefit</Text>
-            <TextInput
-              value={editForm.benefit}
-              onChangeText={text => handleEditChange('benefit', text)}
-              style={{ marginBottom: 8, borderWidth: 1, borderColor: '#ccc', borderRadius: 4, padding: 8 }}
-            />
-            <Text>Estimated Savings</Text>
-            <TextInput
-              value={editForm.estimatedSavings}
-              onChangeText={text => handleEditChange('estimatedSavings', text)}
-              style={{ marginBottom: 16, borderWidth: 1, borderColor: '#ccc', borderRadius: 4, padding: 8 }}
-              keyboardType="numeric"
-            />
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-              <Button onPress={() => setEditModalVisible(false)} style={{ marginRight: 8 }} disabled={editLoading}>Cancel</Button>
-              <Button mode="contained" onPress={handleEditSubmit} loading={editLoading} disabled={editLoading}>Save</Button>
-            </View>
-          </Modal>
-        </Portal>
-        {/* Delete Confirmation Dialog */}
-        <Portal>
-          <Dialog visible={deleteDialogVisible} onDismiss={() => setDeleteDialogVisible(false)}>
-            <Dialog.Title>Delete Idea</Dialog.Title>
-            <Dialog.Content>
-              <Text>Are you sure you want to delete this idea? This action cannot be undone.</Text>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button onPress={() => setDeleteDialogVisible(false)} disabled={deleteLoading}>Cancel</Button>
-              <Button onPress={handleDeleteConfirm} loading={deleteLoading} disabled={deleteLoading} textColor={theme.colors.error}>Delete</Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
       </SafeAreaView>
     </PaperProvider>
   );
