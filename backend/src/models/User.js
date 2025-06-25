@@ -52,6 +52,11 @@ const userSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  mobileNumber: {
+    type: String,
+    required: true,
+    trim: true
   }
 }, {
   timestamps: true
@@ -76,7 +81,8 @@ userSchema.virtual('profile').get(function() {
     isActive: this.isActive,
     lastLogin: this.lastLogin,
     createdAt: this.createdAt,
-    updatedAt: this.updatedAt
+    updatedAt: this.updatedAt,
+    mobileNumber: this.mobileNumber
   };
 });
 

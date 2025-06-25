@@ -21,7 +21,8 @@ const seedUsers = async () => {
       email: 'john.doe@company.com',
       department: 'Engineering',
       designation: 'Senior Engineer',
-      role: 'employee'
+      role: 'employee',
+      mobileNumber: '9876543210'
     },
     {
       employeeNumber: '67890',
@@ -29,7 +30,8 @@ const seedUsers = async () => {
       email: 'jane.smith@company.com',
       department: 'Quality',
       designation: 'Quality Manager',
-      role: 'reviewer'
+      role: 'reviewer',
+      mobileNumber: '9123456780'
     },
     {
       employeeNumber: '22222',
@@ -37,7 +39,8 @@ const seedUsers = async () => {
       email: 'alice.johnson@company.com',
       department: 'Manufacturing',
       designation: 'Production Supervisor',
-      role: 'employee'
+      role: 'employee',
+      mobileNumber: '9988776655'
     },
     {
       employeeNumber: '33333',
@@ -45,7 +48,8 @@ const seedUsers = async () => {
       email: 'bob.wilson@company.com',
       department: 'Engineering',
       designation: 'Design Engineer',
-      role: 'employee'
+      role: 'employee',
+      mobileNumber: '9001122334'
     },
     {
       employeeNumber: '44444',
@@ -53,7 +57,8 @@ const seedUsers = async () => {
       email: 'carol.brown@company.com',
       department: 'Quality',
       designation: 'Quality Inspector',
-      role: 'employee'
+      role: 'employee',
+      mobileNumber: '9112233445'
     }
   ];
 

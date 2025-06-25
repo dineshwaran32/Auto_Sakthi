@@ -167,46 +167,21 @@ const getLeaderboard = async (req, res) => {
         },
         {
           $addFields: {
-            totalIdeas: { $size: '$ideas' },
-            approvedIdeas: {
-              $size: {
-                $filter: {
-                  input: '$ideas',
-                  cond: { $eq: ['$$this.status', 'approved'] }
-                }
-              }
-            },
-            implementedIdeas: {
-              $size: {
-                $filter: {
-                  input: '$ideas',
-                  cond: { $eq: ['$$this.status', 'implemented'] }
-                }
-              }
-            },
-            totalSavings: {
-              $sum: {
-                $map: {
-                  input: {
-                    $filter: {
-                      input: '$ideas',
-                      cond: { $in: ['$$this.status', ['approved', 'implemented']] }
-                    }
-                  },
-                  as: 'idea',
-                  in: { $ifNull: ['$$idea.estimatedSavings', 0] }
-                }
-              }
-            }
-          }
-        },
-        {
-          $addFields: {
-            score: {
+            creditPoints: {
               $add: [
-                { $multiply: ['$totalIdeas', 5] },
-                { $multiply: ['$approvedIdeas', 10] },
-                { $multiply: ['$implementedIdeas', 20] }
+                { $multiply: [{ $size: '$ideas' }, 10] },
+                { $multiply: [{
+                    $size: {
+                      $filter: { input: '$ideas', cond: { $eq: ['$$this.status', 'approved'] } }
+                    }
+                  }, 20] 
+                },
+                { $multiply: [{
+                    $size: {
+                      $filter: { input: '$ideas', cond: { $eq: ['$$this.status', 'implemented'] } }
+                    }
+                  }, 30]
+                }
               ]
             }
           }
@@ -217,14 +192,11 @@ const getLeaderboard = async (req, res) => {
             employeeNumber: 1,
             department: 1,
             designation: 1,
-            totalIdeas: 1,
-            approvedIdeas: 1,
-            implementedIdeas: 1,
-            totalSavings: 1,
-            score: 1
+            creditPoints: 1,
+            ideas: { $size: '$ideas' } 
           }
         },
-        { $sort: { score: -1 } },
+        { $sort: { creditPoints: -1 } },
         { $limit: 50 }
       ]);
 
@@ -264,10 +236,17 @@ const getLeaderboard = async (req, res) => {
             employeeCount: { $arrayElemAt: ['$employeeCount.count', 0] },
             avgIdeasPerEmployee: {
               $divide: ['$totalIdeas', { $ifNull: [{ $arrayElemAt: ['$employeeCount.count', 0] }, 1] }]
+            },
+            totalCreditPoints: {
+              $add: [
+                { $multiply: ['$totalIdeas', 10] },
+                { $multiply: ['$approvedIdeas', 20] },
+                { $multiply: ['$implementedIdeas', 30] }
+              ]
             }
           }
         },
-        { $sort: { totalIdeas: -1 } }
+        { $sort: { totalCreditPoints: -1 } }
       ]);
 
       res.json({

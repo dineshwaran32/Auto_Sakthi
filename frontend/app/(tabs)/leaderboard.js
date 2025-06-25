@@ -59,23 +59,23 @@ export default function LeaderboardScreen() {
         isCurrentUser && styles.currentUserCard
       ]}>
         <Card.Content style={styles.rankContentCompact}>
-          <Surface style={[styles.rankBadgeCompact, { backgroundColor: rankColor }]}> 
+          <Surface style={[styles.rankBadgeCompact, { backgroundColor: rankColor }]}>
             <Text variant="titleSmall" style={styles.rankNumberCompact}>
               {index + 1}
             </Text>
           </Surface>
-          <Avatar.Text 
-            size={32} 
+          <Avatar.Text
+            size={32}
             label={item.name.split(' ').map(n => n[0]).join('')}
             style={styles.userAvatarCompact}
           />
           <Text style={[styles.userNameCompact, isCurrentUser && styles.currentUserText]} numberOfLines={1}>
-            {item.name.split(' ')[0]}{isCurrentUser ? ' (You)' : ''}
+            {item.name}{isCurrentUser ? ' (You)' : ''}
           </Text>
-          <MaterialIcons name="emoji-events" size={18} color={theme.colors.primary} style={{ marginHorizontal: 4 }} />
-          <Text style={styles.statNumberCompact}>{item.totalIdeas}</Text>
-          <MaterialIcons name="check-circle" size={18} color={theme.colors.success} style={{ marginHorizontal: 4 }} />
-          <Text style={styles.statNumberCompact}>{item.implementedIdeas}</Text>
+          <View style={styles.pointsContainer}>
+            <Text style={styles.statNumberCompact}>{item.creditPoints}</Text>
+            <MaterialIcons name="emoji-events" size={18} color={theme.colors.primary} style={{ marginLeft: 4 }} />
+          </View>
         </Card.Content>
       </Card>
     );
@@ -99,10 +99,12 @@ export default function LeaderboardScreen() {
         <Text style={styles.userNameCompact} numberOfLines={1}>
           {item._id || item.department}
         </Text>
-        <MaterialIcons name="groups" size={18} color={theme.colors.tertiary} style={{ marginHorizontal: 4 }} />
-        <Text style={styles.statNumberCompact}>{item.employeeCount || ''}</Text>
-        <MaterialIcons name="lightbulb" size={18} color={theme.colors.primary} style={{ marginHorizontal: 4 }} />
-        <Text style={styles.statNumberCompact}>{item.totalIdeas}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 'auto' }}>
+          <Text style={styles.statNumberCompact}>{item.employeeCount || ''}</Text>
+          <MaterialIcons name="groups" size={18} color={theme.colors.tertiary} style={{ marginLeft: 4, marginRight: 8 }} />
+          <Text style={styles.statNumberCompact}>{item.totalCreditPoints}</Text>
+          <MaterialIcons name="emoji-events" size={18} color={theme.colors.primary} style={{ marginLeft: 4 }} />
+        </View>
       </Card.Content>
     </Card>
   );
@@ -187,6 +189,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.primary,
   },
+  pointsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto'
+  },
   rankContentCompact: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -216,7 +223,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: theme.colors.onSurface,
     fontSize: 14,
-    maxWidth: 70,
     flexShrink: 1,
   },
   currentUserText: {
