@@ -55,8 +55,8 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    if (bellVisible) fetchNotifications();
-  }, [bellVisible]);
+    if (user) fetchNotifications();
+  }, [user]);
 
   const markAsRead = async (id) => {
     try {
