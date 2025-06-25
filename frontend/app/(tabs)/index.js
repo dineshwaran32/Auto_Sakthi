@@ -218,41 +218,10 @@ export default function HomeScreen() {
           </Card>
         </View>
 
-        {/* Menu Grid */}
-        <View style={styles.menuContainer}>
-          <Text variant="headlineSmall" style={styles.sectionTitle}>
-            Quick Actions
-          </Text>
-          <View style={styles.menuGrid}>
-            {menuItems.map((item, index) => (
-              <Card 
-                key={index} 
-                style={styles.menuCard}
-                onPress={() => router.push(item.route)}
-              >
-                <Card.Content style={styles.menuContent}>
-                  <MaterialIcons 
-                    name={item.icon} 
-                    size={32} 
-                    color={item.color} 
-                    style={styles.menuIcon}
-                  />
-                  <Text variant="titleMedium" style={styles.menuTitle}>
-                    {item.title}
-                  </Text>
-                  <Text variant="bodySmall" style={styles.menuSubtitle}>
-                    {item.subtitle}
-                  </Text>
-                </Card.Content>
-              </Card>
-            ))}
-          </View>
-        </View>
-
         {/* Recent Activity */}
         <View style={styles.section}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
-            Recent Activity
+            Your Recent Ideas
           </Text>
           
           {userIdeas.slice(0, 3).map((idea) => (
@@ -302,6 +271,37 @@ export default function HomeScreen() {
               </Card.Content>
             </Card>
           )}
+        </View>
+
+        {/* Menu Grid */}
+        <View style={styles.menuContainer}>
+          <Text variant="headlineSmall" style={styles.sectionTitle}>
+            Quick Actions
+          </Text>
+          <View style={styles.menuGrid}>
+            {menuItems.map((item, index) => (
+              <Card 
+                key={index} 
+                style={styles.menuCard}
+                onPress={() => router.push(item.route)}
+              >
+                <Card.Content style={styles.menuContent}>
+                  <MaterialIcons 
+                    name={item.icon} 
+                    size={32} 
+                    color={item.color} 
+                    style={styles.menuIcon}
+                  />
+                  <Text variant="titleMedium" style={styles.menuTitle}>
+                    {item.title}
+                  </Text>
+                  <Text variant="bodySmall" style={styles.menuSubtitle}>
+                    {item.subtitle}
+                  </Text>
+                </Card.Content>
+              </Card>
+            ))}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -379,40 +379,6 @@ const styles = StyleSheet.create({
   statLabel: {
     color: theme.colors.onSurfaceVariant,
     textAlign: 'center',
-  },
-  menuContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-  },
-  menuGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  menuCard: {
-    width: (width - spacing.lg * 2 - spacing.md) / 2,
-    elevation: 2,
-    marginBottom: spacing.md,
-  },
-  menuContent: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-    minHeight: 120,
-    justifyContent: 'center',
-  },
-  menuIcon: {
-    marginBottom: spacing.sm,
-  },
-  menuTitle: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-    marginBottom: spacing.xs,
-  },
-  menuSubtitle: {
-    textAlign: 'center',
-    color: theme.colors.onSurfaceVariant,
-    fontSize: 12,
   },
   section: {
     paddingHorizontal: spacing.lg,
@@ -498,5 +464,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.onSurface,
     marginTop: spacing.md,
+  },
+  menuContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
+  },
+  menuGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  menuCard: {
+    width: (width - spacing.lg * 2 - spacing.md) / 2,
+    elevation: 2,
+    marginBottom: spacing.md,
+  },
+  menuContent: {
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+    minHeight: 120,
+    justifyContent: 'center',
+  },
+  menuIcon: {
+    marginBottom: spacing.sm,
+  },
+  menuTitle: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: spacing.xs,
+  },
+  menuSubtitle: {
+    textAlign: 'center',
+    color: theme.colors.onSurfaceVariant,
+    fontSize: 12,
   },
 });

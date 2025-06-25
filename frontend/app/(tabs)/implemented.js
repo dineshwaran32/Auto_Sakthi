@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   FlatList,
+  Animated,
 } from 'react-native';
 import {
   Text,
@@ -19,6 +20,32 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useIdeas } from '../../context/IdeaContext';
 import { theme, spacing } from '../../utils/theme';
+
+const AnimatedListItem = ({ children, index }) => {
+  const slideUp = useRef(new Animated.Value(50)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 500,
+      delay: index * 100,
+      useNativeDriver: true,
+    }).start();
+    Animated.timing(slideUp, {
+      toValue: 0,
+      duration: 500,
+      delay: index * 100,
+      useNativeDriver: true,
+    }).start();
+  }, [slideUp, opacity, index]);
+
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY: slideUp }] }}>
+      {children}
+    </Animated.View>
+  );
+};
 
 const DEPARTMENT_FILTERS = [
   { value: 'all', label: 'All Departments' },
@@ -85,98 +112,100 @@ export default function ImplementedScreen() {
   const getUserName = (submittedBy) => submittedBy?.name || 'Unknown User';
   const getUserDept = (submittedBy) => submittedBy?.department || '';
 
-  const renderIdeaCard = ({ item }) => (
-    <Card style={styles.ideaCard}>
-      <Card.Content>
-        <View style={styles.cardHeader}>
-          <View style={styles.titleContainer}>
-            <Text variant="titleLarge" style={styles.ideaTitle}>
-              {item.title}
-            </Text>
-            <Badge 
-              style={[
-                styles.statusBadge,
-                { backgroundColor: getStatusColor(item.status) }
-              ]}
-            >
-              {getStatusText(item.status)}
-            </Badge>
-          </View>
-          
-          <View style={styles.submitterInfo}>
-            <Avatar.Text 
-              size={32} 
-              label={getUserName(item.submittedBy).split(' ').map(n => n[0]).join('')}
-              style={styles.submitterAvatar}
-            />
-            <View style={styles.submitterDetails}>
-              <Text variant="bodyMedium" style={styles.submitterName}>
-                {getUserName(item.submittedBy)}
+  const renderIdeaCard = ({ item, index }) => (
+    <AnimatedListItem index={index}>
+      <Card style={styles.ideaCard}>
+        <Card.Content>
+          <View style={styles.cardHeader}>
+            <View style={styles.titleContainer}>
+              <Text variant="titleLarge" style={styles.ideaTitle}>
+                {item.title}
               </Text>
-              <Text variant="bodySmall" style={styles.submitterDept}>
-                {getUserDept(item.submittedBy)}
-              </Text>
+              <Badge 
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: getStatusColor(item.status) }
+                ]}
+              >
+                {getStatusText(item.status)}
+              </Badge>
+            </View>
+            
+            <View style={styles.submitterInfo}>
+              <Avatar.Text 
+                size={32} 
+                label={getUserName(item.submittedBy).split(' ').map(n => n[0]).join('')}
+                style={styles.submitterAvatar}
+              />
+              <View style={styles.submitterDetails}>
+                <Text variant="bodyMedium" style={styles.submitterName}>
+                  {getUserName(item.submittedBy)}
+                </Text>
+                <Text variant="bodySmall" style={styles.submitterDept}>
+                  {getUserDept(item.submittedBy)}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
-        
-        <Text variant="bodyLarge" style={styles.ideaDescription} numberOfLines={3}>
-          {item.improvement}
-        </Text>
-        
-        <View style={styles.benefitContainer}>
-          <Chip 
-            mode="outlined" 
-            style={[
-              styles.benefitChip,
-              { borderColor: getBenefitColor(item.benefit) }
-            ]}
-            textStyle={{ color: getBenefitColor(item.benefit) }}
-          >
-            {item.benefit.replace('_', ' ').toUpperCase()}
-          </Chip>
-        </View>
-        
-        <View style={styles.cardFooter}>
-          <View style={styles.metadataRow}>
-            <MaterialIcons 
-              name="calendar-today" 
-              size={16} 
-              color={theme.colors.onSurfaceVariant} 
-            />
-            <Text variant="bodySmall" style={styles.metadataText}>
-              Submitted: {item.createdAt ? formatDate(item.createdAt) : ''}
-            </Text>
+          
+          <Text variant="bodyLarge" style={styles.ideaDescription} numberOfLines={3}>
+            {item.improvement}
+          </Text>
+          
+          <View style={styles.benefitContainer}>
+            <Chip 
+              mode="outlined" 
+              style={[
+                styles.benefitChip,
+                { borderColor: getBenefitColor(item.benefit) }
+              ]}
+              textStyle={{ color: getBenefitColor(item.benefit) }}
+            >
+              {item.benefit.replace('_', ' ').toUpperCase()}
+            </Chip>
           </View>
           
-          {item.estimatedSavings && (
-            <View style={styles.savingsContainer}>
+          <View style={styles.cardFooter}>
+            <View style={styles.metadataRow}>
               <MaterialIcons 
-                name="attach-money" 
-                size={18} 
+                name="calendar-today" 
+                size={16} 
+                color={theme.colors.onSurfaceVariant} 
+              />
+              <Text variant="bodySmall" style={styles.metadataText}>
+                Submitted: {item.createdAt ? formatDate(item.createdAt) : ''}
+              </Text>
+            </View>
+            
+            {item.estimatedSavings && (
+              <View style={styles.savingsContainer}>
+                <MaterialIcons 
+                  name="attach-money" 
+                  size={18} 
+                  color={theme.colors.success} 
+                />
+                <Text variant="bodyMedium" style={styles.savingsText}>
+                  Est. Savings: ${item.estimatedSavings.toLocaleString()}
+                </Text>
+              </View>
+            )}
+          </View>
+          
+          {item.status === 'implemented' && (
+            <View style={styles.implementedBanner}>
+              <MaterialIcons 
+                name="check-circle" 
+                size={20} 
                 color={theme.colors.success} 
               />
-              <Text variant="bodyMedium" style={styles.savingsText}>
-                Est. Savings: ${item.estimatedSavings.toLocaleString()}
+              <Text variant="bodyMedium" style={styles.implementedText}>
+                Successfully implemented and delivering results!
               </Text>
             </View>
           )}
-        </View>
-        
-        {item.status === 'implemented' && (
-          <View style={styles.implementedBanner}>
-            <MaterialIcons 
-              name="check-circle" 
-              size={20} 
-              color={theme.colors.success} 
-            />
-            <Text variant="bodyMedium" style={styles.implementedText}>
-              Successfully implemented and delivering results!
-            </Text>
-          </View>
-        )}
-      </Card.Content>
-    </Card>
+        </Card.Content>
+      </Card>
+    </AnimatedListItem>
   );
 
   const renderEmptyState = () => (

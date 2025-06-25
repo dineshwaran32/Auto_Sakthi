@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   FlatList,
   Alert,
+  Animated,
 } from 'react-native';
 import {
   Text,
@@ -26,6 +27,32 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useUser } from '../../context/UserContext';
 import { useIdeas } from '../../context/IdeaContext';
 import { theme, spacing } from '../../utils/theme';
+
+const AnimatedListItem = ({ children, index }) => {
+  const slideUp = useRef(new Animated.Value(50)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 500,
+      delay: index * 100,
+      useNativeDriver: true,
+    }).start();
+    Animated.timing(slideUp, {
+      toValue: 0,
+      duration: 500,
+      delay: index * 100,
+      useNativeDriver: true,
+    }).start();
+  }, [slideUp, opacity, index]);
+
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY: slideUp }] }}>
+      {children}
+    </Animated.View>
+  );
+};
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'All Ideas' },
@@ -87,72 +114,74 @@ export default function TrackerScreen() {
     });
   };
 
-  const renderIdeaCard = ({ item }) => (
-    <Card style={styles.ideaCard}>
-      <Card.Content>
-        <View style={styles.cardHeader}>
-          <Text variant="titleMedium" style={styles.ideaTitle}>
-            {item.title}
-          </Text>
-          <Badge 
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(item.status) }
-            ]}
-          >
-            {getStatusText(item.status)}
-          </Badge>
-        </View>
-        
-        <Text variant="bodyMedium" style={styles.ideaProblem} numberOfLines={2}>
-          {item.problem}
-        </Text>
-        
-        <View style={styles.cardFooter}>
-          <View style={styles.ideaMetadata}>
-            <MaterialIcons 
-              name="business" 
-              size={16} 
-              color={theme.colors.onSurfaceVariant} 
-            />
-            <Text variant="bodySmall" style={styles.metadataText}>
-              {item.department}
+  const renderIdeaCard = ({ item, index }) => (
+    <AnimatedListItem index={index}>
+      <Card style={styles.ideaCard}>
+        <Card.Content>
+          <View style={styles.cardHeader}>
+            <Text variant="titleMedium" style={styles.ideaTitle}>
+              {item.title}
             </Text>
+            <Badge 
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(item.status) }
+              ]}
+            >
+              {getStatusText(item.status)}
+            </Badge>
           </View>
           
-          <View style={styles.ideaMetadata}>
-            <MaterialIcons 
-              name="calendar-today" 
-              size={16} 
-              color={theme.colors.onSurfaceVariant} 
-            />
-            <Text variant="bodySmall" style={styles.metadataText}>
-              {item.createdAt ? formatDate(item.createdAt) : ''}
-            </Text>
+          <Text variant="bodyMedium" style={styles.ideaProblem} numberOfLines={2}>
+            {item.problem}
+          </Text>
+          
+          <View style={styles.cardFooter}>
+            <View style={styles.ideaMetadata}>
+              <MaterialIcons 
+                name="business" 
+                size={16} 
+                color={theme.colors.onSurfaceVariant} 
+              />
+              <Text variant="bodySmall" style={styles.metadataText}>
+                {item.department}
+              </Text>
+            </View>
+            
+            <View style={styles.ideaMetadata}>
+              <MaterialIcons 
+                name="calendar-today" 
+                size={16} 
+                color={theme.colors.onSurfaceVariant} 
+              />
+              <Text variant="bodySmall" style={styles.metadataText}>
+                {item.createdAt ? formatDate(item.createdAt) : ''}
+              </Text>
+            </View>
           </View>
-        </View>
-        
-        <Chip 
-          mode="outlined" 
-          style={styles.benefitChip}
-        >
-          {item.benefit.replace('_', ' ').toUpperCase()}
-        </Chip>
-        
-        {item.estimatedSavings && (
-          <View style={styles.savingsContainer}>
-            <MaterialIcons 
-              name="attach-money" 
-              size={16} 
-              color={theme.colors.tertiary} 
-            />
-            <Text variant="bodySmall" style={styles.savingsText}>
-              Est. Savings: ${item.estimatedSavings}
-            </Text>
-          </View>
-        )}
-      </Card.Content>
-    </Card>
+          
+          <Chip 
+            mode="outlined" 
+            style={styles.benefitChip}
+          >
+            {item.benefit.replace('_', ' ').toUpperCase()}
+          </Chip>
+          
+          {item.estimatedSavings && (
+            <View style={styles.savingsContainer}>
+              <MaterialIcons 
+                name="attach-money" 
+                size={16} 
+                color={theme.colors.tertiary} 
+              />
+              <Text variant="bodySmall" style={styles.savingsText}>
+                Est. Savings: ${item.estimatedSavings}
+              </Text>
+            </View>
+          )}
+        </Card.Content>
+      </Card>
+    </AnimatedListItem>
   );
 
   const renderEmptyState = () => (
