@@ -4,6 +4,7 @@ const validateRequest = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
     if (error) {
+      console.log('Validation error details:', error.details);
       return res.status(400).json({
         success: false,
         message: 'Validation error',
@@ -28,7 +29,8 @@ const schemas = {
     benefit: Joi.string().valid('cost_saving', 'safety', 'quality', 'productivity').required(),
     estimatedSavings: Joi.number().min(0).optional(),
     department: Joi.string().valid('Engineering', 'Quality', 'Manufacturing', 'Management', 'Administration', 'HR', 'Finance').required(),
-    tags: Joi.array().items(Joi.string()).optional()
+    tags: Joi.array().items(Joi.string()).optional(),
+    imageUris: Joi.array().items(Joi.string()).optional()
   }),
 
   updateIdeaStatus: Joi.object({

@@ -3,39 +3,98 @@ const User = require('../models/User');
 const NotificationService = require('../services/notificationService');
 
 // Helper to recalculate and update user's credit points
-async function recalculateUserCreditPoints(userId, reason, updater) {
-  const ideas = await Idea.find({ submittedBy: userId, isActive: { $ne: false } });
-  let submitted = ideas.length;
-  let approved = ideas.filter(i => i.status === 'approved').length;
-  let implemented = ideas.filter(i => i.status === 'implemented').length;
-  const oldUser = await User.findById(userId);
-  const oldPoints = oldUser.creditPoints || 0;
-  const creditPoints = (submitted * 10) + (approved * 20) + (implemented * 30);
-  await User.findByIdAndUpdate(userId, { creditPoints });
-  if (creditPoints !== oldPoints) {
-    await NotificationService.notifyCreditPointsUpdate(oldUser, oldPoints, creditPoints, reason || 'Points recalculated', updater);
+async function recalculateUserCreditPoints(userId, reason, updater, newIdea = null) {
+  try {
+    console.log(`🔄 Recalculating credit points for user ${userId}, reason: ${reason}`);
+    
+    // Get all user's ideas from database
+    let ideas = await Idea.find({ submittedBy: userId, isActive: { $ne: false } });
+    
+    // If a new idea is provided, include it in the calculation
+    if (newIdea) {
+      console.log(`📝 Including new idea in calculation: ${newIdea._id}`);
+      ideas = [...ideas, newIdea];
+    }
+    
+    // Count ideas by status
+    let submitted = ideas.length;
+    let approved = ideas.filter(i => i.status === 'approved').length;
+    let implemented = ideas.filter(i => i.status === 'implemented').length;
+    
+    // Get current user data
+    const oldUser = await User.findById(userId);
+    if (!oldUser) {
+      console.log(`❌ User ${userId} not found`);
+      return;
+    }
+    
+    const oldPoints = oldUser.creditPoints || 0;
+    const creditPoints = (submitted * 10) + (approved * 20) + (implemented * 30);
+    
+    console.log(`📊 Credit Points Calculation:`, {
+      submitted,
+      approved,
+      implemented,
+      oldPoints,
+      newPoints: creditPoints,
+      difference: creditPoints - oldPoints
+    });
+    
+    // Update user's credit points
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { creditPoints }, 
+      { new: true }
+    );
+    
+    console.log(`✅ User credit points updated: ${oldPoints} → ${creditPoints}`);
+    
+    // Send notification if points changed
+    if (creditPoints !== oldPoints) {
+      console.log(`📢 Sending credit points update notification`);
+      await NotificationService.notifyCreditPointsUpdate(oldUser, oldPoints, creditPoints, reason || 'Points recalculated', updater);
+    } else {
+      console.log(`ℹ️ No change in credit points`);
+    }
+    
+    return updatedUser;
+  } catch (error) {
+    console.error(`❌ Error in recalculateUserCreditPoints:`, error);
+    throw error;
   }
 }
 
 const createIdea = async (req, res) => {
   try {
+    console.log('Creating idea for user:', req.user._id, req.user.name);
+    
     const ideaData = {
       ...req.body,
       submittedBy: req.user._id,
       submittedByEmployeeNumber: req.user.employeeNumber
     };
 
+    console.log('Idea data:', ideaData);
+
     const idea = new Idea(ideaData);
     await idea.save();
+
+    console.log('Idea saved with ID:', idea._id);
 
     // Populate the submittedBy field
     await idea.populate('submittedBy', 'name employeeNumber department');
 
+    console.log('About to recalculate credit points for user:', req.user._id);
+
     // Recalculate credit points for the user
-    await recalculateUserCreditPoints(req.user._id, 'Idea submitted', req.user);
+    await recalculateUserCreditPoints(req.user._id, 'Idea submitted', req.user, idea);
+
+    console.log('Credit points recalculation completed');
 
     // Notify reviewers
     await NotificationService.notifyIdeaSubmitted(idea, req.user);
+
+    console.log('Notifications sent');
 
     res.status(201).json({
       success: true,
@@ -203,7 +262,7 @@ const updateIdeaStatus = async (req, res) => {
     await idea.populate('submittedBy', 'name employeeNumber');
 
     // Recalculate credit points for the user
-    await recalculateUserCreditPoints(idea.submittedBy._id, `Idea status changed to ${status}`, req.user);
+    await recalculateUserCreditPoints(idea.submittedBy._id, `Idea status changed to ${status}`, req.user, idea);
 
     // Notify submitter
     await NotificationService.notifyIdeaStatusChange(idea, status, req.user);
@@ -289,10 +348,12 @@ const updateIdea = async (req, res) => {
     if (!idea) {
       return res.status(404).json({ success: false, message: 'Idea not found or not authorized' });
     }
+    
     // Notify submitter if someone else edits the idea
     if (idea.submittedBy.toString() !== req.user._id.toString()) {
       await NotificationService.notifyIdeaUpdated(idea, updates, req.user);
     }
+    
     res.json({ success: true, message: 'Idea updated successfully', data: { idea } });
   } catch (error) {
     console.error('Update idea error:', error);
@@ -310,6 +371,10 @@ const deleteIdea = async (req, res) => {
     if (!idea) {
       return res.status(404).json({ success: false, message: 'Idea not found or not authorized' });
     }
+    
+    // Recalculate credit points for the user after deleting idea
+    await recalculateUserCreditPoints(req.user._id, 'Idea deleted', req.user, idea);
+    
     res.json({ success: true, message: 'Idea deleted successfully' });
   } catch (error) {
     console.error('Delete idea error:', error);

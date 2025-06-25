@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   Alert,
   Platform,
+  Linking,
+  Image,
 } from 'react-native';
 import {
   Text,
@@ -46,6 +48,7 @@ export default function SubmitIdeaScreen() {
   
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [resetCounter, setResetCounter] = useState(0);
   const [formData, setFormData] = useState({
     title: '',
     problem: '',
@@ -56,6 +59,43 @@ export default function SubmitIdeaScreen() {
     department: user?.department || '',
     submittedBy: user?.employeeNumber || '',
   });
+
+  const resetForm = () => {
+    console.log('Resetting form...');
+    const emptyFormData = {
+      title: '',
+      problem: '',
+      improvement: '',
+      benefit: '',
+      estimatedSavings: '',
+      images: [],
+      department: user?.department || '',
+      submittedBy: user?.employeeNumber || '',
+    };
+    
+    setFormData(emptyFormData);
+    setCurrentStep(0);
+    setResetCounter(prev => prev + 1);
+    
+    console.log('Form reset complete. New formData:', emptyFormData);
+    console.log('Current step reset to:', 0);
+    console.log('Reset counter incremented');
+  };
+
+  // Reset form when component mounts or user changes
+  useEffect(() => {
+    resetForm();
+  }, [user]);
+
+  // Monitor form data changes for debugging
+  useEffect(() => {
+    console.log('Form data changed:', formData);
+  }, [formData]);
+
+  // Monitor current step changes for debugging
+  useEffect(() => {
+    console.log('Current step changed to:', currentStep);
+  }, [currentStep]);
 
   const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -102,22 +142,82 @@ export default function SubmitIdeaScreen() {
       return;
     }
 
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (permissionResult.granted === false) {
-      Alert.alert('Permission Required', 'Permission to access camera roll is required!');
+    // Check if we've reached the image limit
+    if (formData.images.length >= 5) {
+      Alert.alert('Image Limit', 'You can add up to 5 images. Please remove some images before adding more.');
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    try {
+      // Request permissions for both camera and media library
+      const mediaLibraryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (!mediaLibraryPermission.granted && !cameraPermission.granted) {
+        Alert.alert(
+          'Permission Required', 
+          'Camera and media library permissions are required to add images. Please enable them in your device settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Settings', onPress: () => Linking.openSettings() }
+          ]
+        );
+        return;
+      }
 
-    if (!result.canceled) {
-      updateFormData('images', [...formData.images, result.assets[0].uri]);
+      // Show action sheet to choose between camera and gallery
+      Alert.alert(
+        'Select Image',
+        'Choose how you want to add an image',
+        [
+          {
+            text: 'Camera',
+            onPress: async () => {
+              if (cameraPermission.granted) {
+                const result = await ImagePicker.launchCameraAsync({
+                  mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                  allowsEditing: true,
+                  aspect: [4, 3],
+                  quality: 0.8,
+                });
+
+                if (!result.canceled && result.assets && result.assets.length > 0) {
+                  updateFormData('images', [...formData.images, result.assets[0].uri]);
+                }
+              } else {
+                Alert.alert('Permission Denied', 'Camera permission is required to take photos.');
+              }
+            }
+          },
+          {
+            text: 'Gallery',
+            onPress: async () => {
+              if (mediaLibraryPermission.granted) {
+                const result = await ImagePicker.launchImageLibraryAsync({
+                  mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                  allowsEditing: true,
+                  aspect: [4, 3],
+                  quality: 0.8,
+                  allowsMultipleSelection: false,
+                });
+
+                if (!result.canceled && result.assets && result.assets.length > 0) {
+                  updateFormData('images', [...formData.images, result.assets[0].uri]);
+                }
+              } else {
+                Alert.alert('Permission Denied', 'Media library permission is required to select photos.');
+              }
+            }
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel'
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image. Please try again.');
     }
   };
 
@@ -138,17 +238,44 @@ export default function SubmitIdeaScreen() {
         department: formData.department,
       };
       // Add optional fields if present
-      if (formData.estimatedSavings) payload.estimatedSavings = Number(formData.estimatedSavings);
+      if (formData.estimatedSavings && formData.estimatedSavings.trim() !== '') {
+        const savings = Number(formData.estimatedSavings);
+        if (!isNaN(savings) && savings >= 0) {
+          payload.estimatedSavings = savings;
+        }
+      }
       if (formData.tags) payload.tags = formData.tags;
-      // (images upload is not handled here, so skip for now)
+      // Add image URIs (for future backend implementation)
+      if (formData.images && formData.images.length > 0) {
+        payload.imageUris = formData.images;
+      }
+
+      console.log('Submitting idea with payload:', payload);
 
       await submitIdea(payload);
+      
+      // Reset form immediately after successful submission
+      resetForm();
+      
       Alert.alert(
         'Success!', 
         'Your idea has been submitted successfully and is now under review.',
-        [{ text: 'OK', onPress: () => router.push('tracker') }]
+        [
+          { 
+            text: 'Submit Another Idea', 
+            onPress: () => {
+              // Form is already reset, just ensure we're on step 1
+              setCurrentStep(0);
+            }
+          },
+          { 
+            text: 'View My Ideas', 
+            onPress: () => router.push('tracker') 
+          }
+        ]
       );
     } catch (error) {
+      console.error('Submit error:', error);
       Alert.alert('Error', 'Failed to submit idea. Please check your input and try again.');
     } finally {
       setLoading(false);
@@ -164,6 +291,7 @@ export default function SubmitIdeaScreen() {
               Basic Information
             </Text>
             <TextInput
+              key={`title-${resetCounter}`}
               label="Idea Title *"
               value={formData.title}
               onChangeText={(text) => updateFormData('title', text)}
@@ -172,6 +300,7 @@ export default function SubmitIdeaScreen() {
               placeholder="Enter a clear, descriptive title"
             />
             <TextInput
+              key={`department-${resetCounter}`}
               label="Department"
               value={formData.department}
               mode="outlined"
@@ -188,6 +317,7 @@ export default function SubmitIdeaScreen() {
               Problem & Solution
             </Text>
             <TextInput
+              key={`problem-${resetCounter}`}
               label="Problem Identified *"
               value={formData.problem}
               onChangeText={(text) => updateFormData('problem', text)}
@@ -198,6 +328,7 @@ export default function SubmitIdeaScreen() {
               placeholder="Describe the current problem or inefficiency"
             />
             <TextInput
+              key={`improvement-${resetCounter}`}
               label="Suggested Improvement *"
               value={formData.improvement}
               onChangeText={(text) => updateFormData('improvement', text)}
@@ -220,6 +351,7 @@ export default function SubmitIdeaScreen() {
               Select the primary benefit category:
             </Text>
             <RadioButton.Group
+              key={`benefit-${resetCounter}`}
               onValueChange={(value) => updateFormData('benefit', value)}
               value={formData.benefit}
             >
@@ -234,6 +366,7 @@ export default function SubmitIdeaScreen() {
             </RadioButton.Group>
             
             <TextInput
+              key={`savings-${resetCounter}`}
               label="Estimated Savings (Optional)"
               value={formData.estimatedSavings}
               onChangeText={(text) => updateFormData('estimatedSavings', text)}
@@ -253,7 +386,7 @@ export default function SubmitIdeaScreen() {
               Supporting Images
             </Text>
             <Text variant="bodyMedium" style={styles.sectionSubtitle}>
-              Add before/after photos or diagrams (optional)
+              Add before/after photos or diagrams (optional) - {formData.images.length}/5 images
             </Text>
             
             <Button
@@ -261,24 +394,33 @@ export default function SubmitIdeaScreen() {
               onPress={pickImage}
               style={styles.imageButton}
               icon="camera"
+              disabled={formData.images.length >= 5}
             >
-              Add Image
+              {formData.images.length >= 5 ? 'Image Limit Reached' : 'Add Image'}
             </Button>
 
             {formData.images.length > 0 && (
               <View style={styles.imageContainer}>
                 {formData.images.map((uri, index) => (
                   <Surface key={index} style={styles.imageItem}>
-                    <Text variant="bodySmall" style={styles.imageText}>
-                      Image {index + 1}
-                    </Text>
-                    <Button
-                      mode="text"
-                      onPress={() => removeImage(index)}
-                      textColor={theme.colors.error}
-                    >
-                      Remove
-                    </Button>
+                    <Image 
+                      source={{ uri }} 
+                      style={styles.imagePreview}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.imageActions}>
+                      <Text variant="bodySmall" style={styles.imageText}>
+                        Image {index + 1}
+                      </Text>
+                      <Button
+                        mode="text"
+                        onPress={() => removeImage(index)}
+                        textColor={theme.colors.error}
+                        compact
+                      >
+                        Remove
+                      </Button>
+                    </View>
                   </Surface>
                 ))}
               </View>
@@ -350,11 +492,38 @@ export default function SubmitIdeaScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} key={`form-reset-${resetCounter}`}>
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.headerTitle}>
-          Submit Idea
-        </Text>
+        <View style={styles.headerTop}>
+          <Text variant="headlineMedium" style={styles.headerTitle}>
+            Submit Idea
+          </Text>
+          <Button
+            mode="text"
+            onPress={() => {
+              // Only show confirmation if form has data
+              const hasData = formData.title || formData.problem || formData.improvement || formData.benefit || formData.estimatedSavings || formData.images.length > 0;
+              
+              if (hasData) {
+                Alert.alert(
+                  'Start New Idea',
+                  'Are you sure you want to start a new idea? All current data will be lost.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Start New', onPress: resetForm }
+                  ]
+                );
+              } else {
+                resetForm();
+              }
+            }}
+            icon="plus"
+            compact
+            textColor={formData.title || formData.problem || formData.improvement || formData.benefit || formData.estimatedSavings || formData.images.length > 0 ? theme.colors.primary : theme.colors.onSurfaceVariant}
+          >
+            {formData.title || formData.problem || formData.improvement || formData.benefit || formData.estimatedSavings || formData.images.length > 0 ? 'New Idea' : 'Clear Form'}
+          </Button>
+        </View>
         <ProgressBar 
           progress={(currentStep + 1) / STEPS.length} 
           style={styles.progressBar}
@@ -412,6 +581,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     elevation: 2,
   },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   headerTitle: {
     fontWeight: 'bold',
     marginBottom: spacing.md,
@@ -464,6 +638,18 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     borderRadius: 8,
     elevation: 1,
+  },
+  imagePreview: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  imageActions: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginLeft: spacing.md,
   },
   imageText: {
     color: theme.colors.onSurface,

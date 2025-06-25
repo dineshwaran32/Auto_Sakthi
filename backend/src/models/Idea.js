@@ -80,6 +80,10 @@ const ideaSchema = new mongoose.Schema({
     type: String,
     trim: true
   }],
+  imageUris: [{
+    type: String,
+    trim: true
+  }],
   priority: {
     type: String,
     enum: ['low', 'medium', 'high', 'critical'],

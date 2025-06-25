@@ -14,6 +14,7 @@ import {
   List,
   Badge,
   Surface,
+  IconButton,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -23,7 +24,7 @@ import { theme, spacing } from '../../utils/theme';
 import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
-  const { user, logout } = useUser();
+  const { user, logout, refreshUser } = useUser();
   const { ideas } = useIdeas();
   const router = useRouter();
 
@@ -31,31 +32,38 @@ export default function ProfileScreen() {
 
   const userIdeas = ideas.filter(idea => idea.submittedBy?.employeeNumber === user.employeeNumber);
   const approvedIdeas = userIdeas.filter(idea => idea.status === 'approved');
-  const implementedIdeas = userIdeas.filter(idea => idea.status === 'implementing');
+  const implementedIdeas = userIdeas.filter(idea => idea.status === 'implemented');
+  
+  // Calculate credit points breakdown
+  const submittedPoints = userIdeas.length * 10;
+  const approvedPoints = approvedIdeas.length * 20;
+  const implementedPoints = implementedIdeas.length * 30;
+  const totalCalculatedPoints = submittedPoints + approvedPoints + implementedPoints;
   
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      // Web: use window.confirm
-      if (window.confirm('Are you sure you want to sign out?')) {
-        logout().then(() => router.replace('/'));
-      }
-    } else {
-      // Native: use Alert
-      Alert.alert(
-        'Confirm Logout',
-        'Are you sure you want to sign out?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Sign Out', 
-            onPress: async () => {
-              await logout();
-              router.replace('/');
-            }, 
-            style: 'destructive' 
-          },
-        ]
-      );
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Sign Out', 
+          onPress: async () => {
+            await logout();
+            router.replace('/');
+          }, 
+          style: 'destructive' 
+        },
+      ]
+    );
+  };
+
+  const handleRefreshProfile = async () => {
+    try {
+      await refreshUser();
+      Alert.alert('Success', 'Profile data refreshed successfully!');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to refresh profile data. Please try again.');
     }
   };
 
@@ -148,9 +156,17 @@ export default function ProfileScreen() {
         {/* Credit Points */}
         <Card style={styles.statsCard}>
           <Card.Content>
-            <Text variant="titleLarge" style={styles.sectionTitle}>
-              Credit Points
-            </Text>
+            <View style={styles.creditPointsHeader}>
+              <Text variant="titleLarge" style={styles.sectionTitle}>
+                Credit Points
+              </Text>
+              <IconButton
+                icon="refresh"
+                size={20}
+                onPress={handleRefreshProfile}
+                iconColor={theme.colors.primary}
+              />
+            </View>
             <View style={{ alignItems: 'center', marginVertical: spacing.lg }}>
               <Surface style={[styles.statIcon, { backgroundColor: theme.colors.secondaryContainer }]}> 
                 <MaterialIcons name="stars" size={32} color={theme.colors.secondary} />
@@ -158,6 +174,52 @@ export default function ProfileScreen() {
               <Text variant="displayMedium" style={{ fontWeight: 'bold', color: theme.colors.secondary, marginTop: spacing.md }}>
                 {user.creditPoints ?? 0}
               </Text>
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: spacing.xs }}>
+                Total Credit Points
+              </Text>
+            </View>
+            
+            {/* Credit Points Breakdown */}
+            <View style={styles.breakdownContainer}>
+              <Text variant="titleMedium" style={styles.breakdownTitle}>
+                Points Breakdown
+              </Text>
+              <View style={styles.breakdownItem}>
+                <MaterialIcons name="lightbulb" size={16} color={theme.colors.primary} />
+                <Text variant="bodyMedium" style={styles.breakdownLabel}>
+                  Ideas Submitted ({userIdeas.length})
+                </Text>
+                <Text variant="bodyMedium" style={styles.breakdownPoints}>
+                  +{submittedPoints}
+                </Text>
+              </View>
+              <View style={styles.breakdownItem}>
+                <MaterialIcons name="check-circle" size={16} color={theme.colors.success} />
+                <Text variant="bodyMedium" style={styles.breakdownLabel}>
+                  Ideas Approved ({approvedIdeas.length})
+                </Text>
+                <Text variant="bodyMedium" style={styles.breakdownPoints}>
+                  +{approvedPoints}
+                </Text>
+              </View>
+              <View style={styles.breakdownItem}>
+                <MaterialIcons name="build" size={16} color={theme.colors.tertiary} />
+                <Text variant="bodyMedium" style={styles.breakdownLabel}>
+                  Ideas Implemented ({implementedIdeas.length})
+                </Text>
+                <Text variant="bodyMedium" style={styles.breakdownPoints}>
+                  +{implementedPoints}
+                </Text>
+              </View>
+              <Divider style={{ marginVertical: spacing.sm }} />
+              <View style={styles.breakdownItem}>
+                <Text variant="bodyMedium" style={[styles.breakdownLabel, { fontWeight: 'bold' }]}>
+                  Total Calculated
+                </Text>
+                <Text variant="bodyMedium" style={[styles.breakdownPoints, { fontWeight: 'bold' }]}>
+                  {totalCalculatedPoints}
+                </Text>
+              </View>
             </View>
           </Card.Content>
         </Card>
@@ -321,5 +383,33 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.lg,
     marginBottom: spacing.lg,
     borderColor: theme.colors.error,
+  },
+  creditPointsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  breakdownContainer: {
+    marginTop: spacing.md,
+  },
+  breakdownTitle: {
+    fontWeight: 'bold',
+    marginBottom: spacing.md,
+    color: theme.colors.onSurface,
+  },
+  breakdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  breakdownLabel: {
+    flex: 1,
+    color: theme.colors.onSurfaceVariant,
+  },
+  breakdownPoints: {
+    fontWeight: 'bold',
+    color: theme.colors.primary,
   },
 });

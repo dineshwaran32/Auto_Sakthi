@@ -152,41 +152,6 @@ class NotificationService {
     }
   }
 
-  // Milestone achievement notification
-  static async notifyMilestoneAchieved(user, milestone) {
-    try {
-      const milestoneMessages = {
-        'first_idea': 'Congratulations on submitting your first idea!',
-        'five_ideas': 'Great job! You\'ve submitted 5 ideas.',
-        'ten_ideas': 'Amazing! You\'ve submitted 10 ideas.',
-        'first_approved': 'Congratulations! Your first idea has been approved.',
-        'five_approved': 'Excellent! You\'ve had 5 ideas approved.',
-        'first_implemented': 'Fantastic! Your first idea has been implemented.',
-        'hundred_points': 'Congratulations! You\'ve reached 100 credit points.',
-        'five_hundred_points': 'Incredible! You\'ve reached 500 credit points.',
-        'thousand_points': 'Outstanding! You\'ve reached 1000 credit points!'
-      };
-
-      const notification = {
-        recipient: user._id,
-        recipientEmployeeNumber: user.employeeNumber,
-        type: 'milestone_achieved',
-        title: 'Milestone Achieved! 🎉',
-        message: milestoneMessages[milestone] || `Congratulations on achieving the ${milestone} milestone!`,
-        relatedUser: user._id,
-        priority: 'high',
-        metadata: {
-          milestone: milestone,
-          achievedAt: new Date()
-        }
-      };
-
-      await this.createNotification(notification);
-    } catch (error) {
-      console.error('Error notifying milestone achievement:', error);
-    }
-  }
-
   // Department leader notification
   static async notifyDepartmentLeader(user, department, position) {
     try {

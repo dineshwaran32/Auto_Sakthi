@@ -7,7 +7,9 @@ const {
   getUserById,
   updateUser,
   deleteUser,
-  getLeaderboard
+  getLeaderboard,
+  recalculateAllCreditPoints,
+  recalculateUserCreditPoints
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -26,6 +28,16 @@ router.post('/', auth, authorize('admin'), validateRequest(schemas.createUser), 
 // @desc    Get leaderboard
 // @access  Private
 router.get('/leaderboard', auth, getLeaderboard);
+
+// @route   POST /api/users/recalculate-credit-points
+// @desc    Recalculate all users' credit points
+// @access  Private (Admin)
+router.post('/recalculate-credit-points', auth, authorize('admin'), recalculateAllCreditPoints);
+
+// @route   POST /api/users/:userId/recalculate-credit-points
+// @desc    Recalculate credit points for a specific user
+// @access  Private (Admin)
+router.post('/:userId/recalculate-credit-points', auth, authorize('admin'), recalculateUserCreditPoints);
 
 // @route   GET /api/users/:id
 // @desc    Get user by ID

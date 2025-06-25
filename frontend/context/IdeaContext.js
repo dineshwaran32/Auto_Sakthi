@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 import api from '../utils/api';
 
 const IdeaContext = createContext();
@@ -27,6 +27,11 @@ const ideaReducer = (state, action) => {
         ...state,
         loading: action.payload,
       };
+    case 'CLEAR_IDEAS':
+      return {
+        ...state,
+        ideas: [],
+      };
     default:
       return state;
   }
@@ -40,9 +45,12 @@ const initialState = {
 export const IdeaProvider = ({ children }) => {
   const [state, dispatch] = useReducer(ideaReducer, initialState);
 
-  useEffect(() => {
-    loadIdeas();
-  }, []);
+  // Callback to refresh user data (will be set by UserProvider)
+  let refreshUserCallback = null;
+
+  const setRefreshUserCallback = (callback) => {
+    refreshUserCallback = callback;
+  };
 
   const loadIdeas = async () => {
     try {
@@ -51,15 +59,34 @@ export const IdeaProvider = ({ children }) => {
       dispatch({ type: 'SET_IDEAS', payload: res.data.data.ideas });
     } catch (error) {
       console.error('Error loading ideas:', error);
+      // Don't throw error, just log it
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
+  const clearIdeas = () => {
+    dispatch({ type: 'CLEAR_IDEAS' });
+  };
+
   const submitIdea = async (ideaData) => {
     try {
+      console.log('Submitting idea:', ideaData);
       const res = await api.post('/api/ideas', ideaData);
+      console.log('Idea submitted successfully:', res.data);
+      
       await loadIdeas();
+      console.log('Ideas reloaded');
+      
+      // Refresh user data to update credit points
+      if (refreshUserCallback) {
+        console.log('Calling refreshUser callback...');
+        await refreshUserCallback();
+        console.log('refreshUser callback completed');
+      } else {
+        console.log('No refreshUser callback available');
+      }
+      
       return res.data.data.idea;
     } catch (error) {
       console.error('Error submitting idea:', error);
@@ -71,6 +98,10 @@ export const IdeaProvider = ({ children }) => {
     try {
       const res = await api.put(`/api/ideas/${ideaId}/status`, statusData);
       dispatch({ type: 'UPDATE_IDEA', payload: res.data.data.idea });
+      // Refresh user data to update credit points
+      if (refreshUserCallback) {
+        await refreshUserCallback();
+      }
       return res.data.data.idea;
     } catch (error) {
       console.error('Error updating idea status:', error);
@@ -99,6 +130,10 @@ export const IdeaProvider = ({ children }) => {
           type: 'SET_IDEAS', 
           payload: state.ideas.filter(idea => idea._id !== ideaId) 
         });
+        // Refresh user data to update credit points
+        if (refreshUserCallback) {
+          await refreshUserCallback();
+        }
       } else {
         throw new Error(response.data.message || 'Failed to delete idea');
       }
@@ -115,7 +150,9 @@ export const IdeaProvider = ({ children }) => {
       updateIdeaStatus,
       loadIdeas,
       editIdea,
-      deleteIdea
+      deleteIdea,
+      clearIdeas,
+      setRefreshUserCallback
     }}>
       {children}
     </IdeaContext.Provider>

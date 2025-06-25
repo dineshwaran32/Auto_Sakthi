@@ -1,4 +1,23 @@
 require('dotenv').config();
+
+// Set fallback JWT_SECRET if not provided
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'fallback_jwt_secret_for_development_only';
+  console.warn('⚠️  JWT_SECRET not set, using fallback secret. Set JWT_SECRET in production!');
+}
+
+// Set fallback JWT_EXPIRES_IN if not provided
+if (!process.env.JWT_EXPIRES_IN) {
+  process.env.JWT_EXPIRES_IN = '7d';
+  console.warn('⚠️  JWT_EXPIRES_IN not set, using 7 days. Set JWT_EXPIRES_IN in production!');
+}
+
+// Set fallback MONGODB_URI if not provided
+if (!process.env.MONGODB_URI) {
+  process.env.MONGODB_URI = 'mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Kaizen_Idea?retryWrites=true&w=majority&appName=Cluster0';
+  console.warn('⚠️  MONGODB_URI not set, using localhost. Set MONGODB_URI in production!');
+}
+
 // console.log('📊 Environment:', process.env.NODE_ENV);
 // console.log('🔗 MongoDB URI:', process.env.MONGODB_URI ? process.env.MONGODB_URI.replace(/:\/\/.*:(.*)@/, '://<user>:<password>@') : 'undefined');
 
@@ -24,16 +43,31 @@ connectDB();
 // Security middleware
 app.use(helmet());
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-  message: {
-    success: false,
-    message: 'Too many requests from this IP, please try again later.'
-  }
-});
-app.use('/api/', limiter);
+// Rate limiting - DISABLED FOR DEVELOPMENT
+// const limiter = rateLimit({
+//   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+//   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (process.env.NODE_ENV === 'development' ? 10000 : 1000), // Higher limit for development
+//   message: {
+//     success: false,
+//     message: 'Too many requests from this IP, please try again later.'
+//   },
+//   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+//   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+// });
+
+// More lenient rate limiter for auth endpoints - DISABLED FOR DEVELOPMENT
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: process.env.NODE_ENV === 'development' ? 100 : 20, // Allow more login attempts in development
+//   message: {
+//     success: false,
+//     message: 'Too many login attempts, please try again later.'
+//   },
+//   standardHeaders: true,
+//   legacyHeaders: false,
+// });
+
+// app.use('/api/', limiter);
 
 const corsOptions = {
   origin: "*", // Allow RN dev server & emulator

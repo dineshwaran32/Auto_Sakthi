@@ -285,11 +285,89 @@ const getLeaderboard = async (req, res) => {
   }
 };
 
+const recalculateAllCreditPoints = async (req, res) => {
+  try {
+    const users = await User.find({});
+    let updatedCount = 0;
+    
+    for (const user of users) {
+      const ideas = await Idea.find({ submittedBy: user._id, isActive: { $ne: false } });
+      let submitted = ideas.length;
+      let approved = ideas.filter(i => i.status === 'approved').length;
+      let implemented = ideas.filter(i => i.status === 'implemented').length;
+      const creditPoints = (submitted * 10) + (approved * 20) + (implemented * 30);
+      
+      if (user.creditPoints !== creditPoints) {
+        user.creditPoints = creditPoints;
+        await user.save();
+        updatedCount++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Credit points recalculated for ${updatedCount} users`,
+      data: { updatedCount }
+    });
+
+  } catch (error) {
+    console.error('Recalculate credit points error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while recalculating credit points'
+    });
+  }
+};
+
+const recalculateUserCreditPoints = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const ideas = await Idea.find({ submittedBy: userId, isActive: { $ne: false } });
+    let submitted = ideas.length;
+    let approved = ideas.filter(i => i.status === 'approved').length;
+    let implemented = ideas.filter(i => i.status === 'implemented').length;
+    const creditPoints = (submitted * 10) + (approved * 20) + (implemented * 30);
+    
+    const oldPoints = user.creditPoints || 0;
+    user.creditPoints = creditPoints;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `Credit points recalculated for user ${user.name}`,
+      data: { 
+        user: user.profile,
+        oldPoints,
+        newPoints: creditPoints,
+        difference: creditPoints - oldPoints
+      }
+    });
+
+  } catch (error) {
+    console.error('Recalculate user credit points error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while recalculating user credit points'
+    });
+  }
+};
+
 module.exports = {
   getUsers,
   createUser,
   getUserById,
   updateUser,
   deleteUser,
-  getLeaderboard
+  getLeaderboard,
+  recalculateAllCreditPoints,
+  recalculateUserCreditPoints
 };

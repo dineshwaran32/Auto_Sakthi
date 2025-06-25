@@ -243,19 +243,17 @@ export default function ImplementedScreen() {
         </Menu>
       </View>
 
-      {filteredIdeas.length > 0 ? (
-        <FlatList
-          data={filteredIdeas}
-          renderItem={renderIdeaCard}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-        />
-      ) : (
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {renderEmptyState()}
-        </ScrollView>
-      )}
+      <FlatList
+        data={filteredIdeas}
+        renderItem={renderIdeaCard}
+        keyExtractor={(item) => item._id || item.id}
+        contentContainerStyle={[
+          styles.list,
+          filteredIdeas.length === 0 && styles.emptyList
+        ]}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={renderEmptyState}
+      />
     </SafeAreaView>
   );
 }
@@ -292,10 +290,6 @@ const styles = StyleSheet.create({
   list: {
     padding: spacing.lg,
     paddingBottom: spacing.xl,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
   },
   ideaCard: {
     marginBottom: spacing.lg,
@@ -397,5 +391,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: theme.colors.onSurfaceVariant,
     lineHeight: 20,
+  },
+  emptyList: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
 });

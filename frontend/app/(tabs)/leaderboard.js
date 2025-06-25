@@ -138,17 +138,15 @@ export default function LeaderboardScreen() {
           ]}
         />
       </View>
-      <ScrollView horizontal={false} contentContainerStyle={styles.scrollContainer}>
-        <FlatList
-          data={viewMode === 'individual' ? individualStats : departmentStats}
-          renderItem={viewMode === 'individual' ? renderIndividualRankItem : renderDepartmentRankItem}
-          keyExtractor={(item, index) => 
-            viewMode === 'individual' ? item.employeeNumber : (item._id || item.department)
-          }
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-        />
-      </ScrollView>
+      <FlatList
+        data={viewMode === 'individual' ? individualStats : departmentStats}
+        renderItem={viewMode === 'individual' ? renderIndividualRankItem : renderDepartmentRankItem}
+        keyExtractor={(item, index) => 
+          viewMode === 'individual' ? item.employeeNumber : (item._id || item.department)
+        }
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 }
@@ -175,12 +173,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
   },
-  scrollContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-    minWidth: width,
-  },
   list: {
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xl,
   },
   rankCard: {

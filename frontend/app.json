@@ -11,6 +11,13 @@
     "ios": {
       "supportsTablet": true
     },
+    "android": {
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
     "web": {
       "bundler": "metro",
       "output": "single",

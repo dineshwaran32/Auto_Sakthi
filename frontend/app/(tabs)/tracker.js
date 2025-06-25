@@ -221,19 +221,17 @@ export default function TrackerScreen() {
           </Menu>
         </View>
 
-        {filteredIdeas.length > 0 ? (
-          <FlatList
-            data={filteredIdeas}
-            renderItem={renderIdeaCard}
-            keyExtractor={(item) => item._id}
-            contentContainerStyle={styles.list}
-            showsVerticalScrollIndicator={false}
-          />
-        ) : (
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
-            {renderEmptyState()}
-          </ScrollView>
-        )}
+        <FlatList
+          data={filteredIdeas}
+          renderItem={renderIdeaCard}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={[
+            styles.list,
+            filteredIdeas.length === 0 && styles.emptyList
+          ]}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={renderEmptyState}
+        />
       </SafeAreaView>
     </PaperProvider>
   );
@@ -341,5 +339,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: theme.colors.onSurfaceVariant,
     lineHeight: 20,
+  },
+  emptyList: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
 });

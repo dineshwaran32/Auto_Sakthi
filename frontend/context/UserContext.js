@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../utils/api';
 
 const UserContext = createContext();
 
@@ -21,6 +22,11 @@ const userReducer = (state, action) => {
       return {
         ...state,
         loading: action.payload,
+      };
+    case 'UPDATE_USER':
+      return {
+        ...state,
+        user: action.payload,
       };
     default:
       return state;
@@ -72,8 +78,19 @@ export const UserProvider = ({ children }) => {
   const checkAuthState = async () => {
     try {
       const userData = await storage.getItem('user');
-      if (userData) {
-        dispatch({ type: 'LOGIN', payload: JSON.parse(userData) });
+      const token = await storage.getItem('token');
+      
+      if (userData && token) {
+        const user = JSON.parse(userData);
+        // Ensure the user object has the token
+        const userWithToken = { ...user, token };
+        dispatch({ type: 'LOGIN', payload: userWithToken });
+      } else if (userData) {
+        // If we have user data but no separate token, check if token is in user data
+        const user = JSON.parse(userData);
+        if (user.token) {
+          dispatch({ type: 'LOGIN', payload: user });
+        }
       }
     } catch (error) {
       console.error('Error checking auth state:', error);
@@ -124,8 +141,38 @@ export const UserProvider = ({ children }) => {
     dispatch({ type: 'LOGOUT' });
   };
 
+  const refreshUser = async () => {
+    try {
+      console.log('Refreshing user data...');
+      const userData = await storage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        console.log('Current user data:', user);
+        
+        // Fetch fresh user data from the server
+        const response = await api.get('/api/auth/profile');
+        console.log('Profile API response:', response.data);
+        
+        if (response.data.success) {
+          const updatedUser = { ...response.data.data.user, token: user.token };
+          console.log('Updated user data:', updatedUser);
+          
+          await storage.setItem('user', JSON.stringify(updatedUser));
+          dispatch({ type: 'UPDATE_USER', payload: updatedUser });
+          console.log('User data updated successfully');
+        } else {
+          console.log('Profile API returned error:', response.data);
+        }
+      } else {
+        console.log('No user data found in storage');
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
+
   return (
-    <UserContext.Provider value={{ ...state, login, logout }}>
+    <UserContext.Provider value={{ ...state, login, logout, refreshUser }}>
       {children}
     </UserContext.Provider>
   );

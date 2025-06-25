@@ -39,6 +39,11 @@ router.get('/:id', auth, getIdeaById);
 // @access  Private (Owner)
 router.put('/:id', auth, updateIdea);
 
+// @route   PUT /api/ideas/:id/status
+// @desc    Update idea status (review/approve/reject)
+// @access  Private (Reviewers/Admins)
+router.put('/:id/status', auth, authorize('reviewer', 'admin'), updateIdeaStatus);
+
 // @route   DELETE /api/ideas/:id
 // @desc    Delete an idea (soft delete)
 // @access  Private (Owner)

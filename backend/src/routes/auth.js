@@ -2,8 +2,21 @@ const express = require('express');
 const { validateRequest, schemas } = require('../middleware/validation');
 const { auth } = require('../middleware/auth');
 const { login, getProfile, logout } = require('../controllers/authController');
+// const rateLimit = require('express-rate-limit');
 
 const router = express.Router();
+
+// More lenient rate limiter for auth endpoints - DISABLED FOR DEVELOPMENT
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: process.env.NODE_ENV === 'development' ? 100 : 20, // Allow more login attempts in development
+//   message: {
+//     success: false,
+//     message: 'Too many login attempts, please try again later.'
+//   },
+//   standardHeaders: true,
+//   legacyHeaders: false,
+// });
 
 // @route   POST /api/auth/login
 // @desc    Login user
