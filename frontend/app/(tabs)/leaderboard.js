@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   FlatList,
   Dimensions,
+  Animated,
 } from 'react-native';
 import {
   Text,
@@ -21,6 +22,32 @@ import api from '../../utils/api';
 import { theme, spacing } from '../../utils/theme';
 
 const { width } = Dimensions.get('window');
+
+const AnimatedListItem = ({ children, index }) => {
+  const slideUp = useRef(new Animated.Value(50)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 500,
+      delay: index * 100,
+      useNativeDriver: true,
+    }).start();
+    Animated.timing(slideUp, {
+      toValue: 0,
+      duration: 500,
+      delay: index * 100,
+      useNativeDriver: true,
+    }).start();
+  }, [slideUp, opacity, index]);
+
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY: slideUp }] }}>
+      {children}
+    </Animated.View>
+  );
+};
 
 export default function LeaderboardScreen() {
   const { user } = useUser();
@@ -54,59 +81,63 @@ export default function LeaderboardScreen() {
     const isCurrentUser = item.employeeNumber === user?.employeeNumber;
     const rankColor = index < 3 ? ['#FFD700', '#C0C0C0', '#CD7F32'][index] : theme.colors.onSurfaceVariant;
     return (
-      <Card style={[
-        styles.rankCard,
-        isCurrentUser && styles.currentUserCard
-      ]}>
-        <Card.Content style={styles.rankContentCompact}>
-          <Surface style={[styles.rankBadgeCompact, { backgroundColor: rankColor }]}>
-            <Text variant="titleSmall" style={styles.rankNumberCompact}>
-              {index + 1}
+      <AnimatedListItem index={index}>
+        <Card style={[
+          styles.rankCard,
+          isCurrentUser && styles.currentUserCard
+        ]}>
+          <Card.Content style={styles.rankContentCompact}>
+            <Surface style={[styles.rankBadgeCompact, { backgroundColor: rankColor }]}>
+              <Text variant="titleSmall" style={styles.rankNumberCompact}>
+                {index + 1}
+              </Text>
+            </Surface>
+            <Avatar.Text
+              size={32}
+              label={item.name.split(' ').map(n => n[0]).join('')}
+              style={styles.userAvatarCompact}
+            />
+            <Text style={[styles.userNameCompact, isCurrentUser && styles.currentUserText]} numberOfLines={1}>
+              {item.name}{isCurrentUser ? ' (You)' : ''}
             </Text>
-          </Surface>
-          <Avatar.Text
-            size={32}
-            label={item.name.split(' ').map(n => n[0]).join('')}
-            style={styles.userAvatarCompact}
-          />
-          <Text style={[styles.userNameCompact, isCurrentUser && styles.currentUserText]} numberOfLines={1}>
-            {item.name}{isCurrentUser ? ' (You)' : ''}
-          </Text>
-          <View style={styles.pointsContainer}>
-            <Text style={styles.statNumberCompact}>{item.creditPoints}</Text>
-            <MaterialIcons name="emoji-events" size={18} color={theme.colors.primary} style={{ marginLeft: 4 }} />
-          </View>
-        </Card.Content>
-      </Card>
+            <View style={styles.pointsContainer}>
+              <Text style={styles.statNumberCompact}>{item.creditPoints}</Text>
+              <MaterialIcons name="emoji-events" size={18} color={theme.colors.primary} style={{ marginLeft: 4 }} />
+            </View>
+          </Card.Content>
+        </Card>
+      </AnimatedListItem>
     );
   };
 
   const renderDepartmentRankItem = ({ item, index }) => (
-    <Card style={styles.rankCard}>
-      <Card.Content style={styles.rankContentCompact}>
-        <Surface style={[styles.rankBadgeCompact, { 
-          backgroundColor: index < 3 ? ['#FFD700', '#C0C0C0', '#CD7F32'][index] : theme.colors.onSurfaceVariant 
-        }]}> 
-          <Text variant="titleSmall" style={styles.rankNumberCompact}>
-            {index + 1}
+    <AnimatedListItem index={index}>
+      <Card style={styles.rankCard}>
+        <Card.Content style={styles.rankContentCompact}>
+          <Surface style={[styles.rankBadgeCompact, { 
+            backgroundColor: index < 3 ? ['#FFD700', '#C0C0C0', '#CD7F32'][index] : theme.colors.onSurfaceVariant 
+          }]}> 
+            <Text variant="titleSmall" style={styles.rankNumberCompact}>
+              {index + 1}
+            </Text>
+          </Surface>
+          <Avatar.Icon 
+            size={32} 
+            icon="business"
+            style={styles.deptAvatarCompact}
+          />
+          <Text style={styles.userNameCompact} numberOfLines={1}>
+            {item._id || item.department}
           </Text>
-        </Surface>
-        <Avatar.Icon 
-          size={32} 
-          icon="business"
-          style={styles.deptAvatarCompact}
-        />
-        <Text style={styles.userNameCompact} numberOfLines={1}>
-          {item._id || item.department}
-        </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 'auto' }}>
-          <Text style={styles.statNumberCompact}>{item.employeeCount || ''}</Text>
-          <MaterialIcons name="groups" size={18} color={theme.colors.tertiary} style={{ marginLeft: 4, marginRight: 8 }} />
-          <Text style={styles.statNumberCompact}>{item.totalCreditPoints}</Text>
-          <MaterialIcons name="emoji-events" size={18} color={theme.colors.primary} style={{ marginLeft: 4 }} />
-        </View>
-      </Card.Content>
-    </Card>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 'auto' }}>
+            <Text style={styles.statNumberCompact}>{item.employeeCount || ''}</Text>
+            <MaterialIcons name="groups" size={18} color={theme.colors.tertiary} style={{ marginLeft: 4, marginRight: 8 }} />
+            <Text style={styles.statNumberCompact}>{item.totalCreditPoints}</Text>
+            <MaterialIcons name="emoji-events" size={18} color={theme.colors.primary} style={{ marginLeft: 4 }} />
+          </View>
+        </Card.Content>
+      </Card>
+    </AnimatedListItem>
   );
 
   return (
