@@ -27,6 +27,7 @@ export default function LoginScreen() {
   const [employeeNumber, setEmployeeNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1); // 1: enter emp no, 2: enter otp
   const { login, isAuthenticated } = useUser();
   const router = useRouter();
 
@@ -36,24 +37,35 @@ export default function LoginScreen() {
     }
   }, [isAuthenticated]);
 
-  const handleLogin = async () => {
+  const handleSendOtp = async () => {
+    if (!employeeNumber) {
+      Alert.alert('Error', 'Please enter your Employee Number');
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await api.post('/api/auth/send-otp', { employeeNumber });
+      if (response.data.success) {
+        setStep(2);
+        Alert.alert('Success', 'OTP sent to your registered mobile number');
+      } else {
+        Alert.alert('Error', response.data.message || 'Failed to send OTP');
+      }
+    } catch (error) {
+      Alert.alert('Error', error.response?.data?.message || 'Failed to send OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
     if (!employeeNumber || !otp) {
       Alert.alert('Error', 'Please enter both Employee Number and OTP');
       return;
     }
-
-    console.log('Attempting login with:', { employeeNumber, otp });
     setLoading(true);
-
     try {
-      const response = await api.post('/api/auth/login', {
-        employeeNumber,
-        otp,
-      });
-
-      console.log('Login response:', response.data);
-      console.log('Response data user:', response.data.data);
-
+      const response = await api.post('/api/auth/verify-otp', { employeeNumber, otp });
       if (response.data.success) {
         const loginSuccess = await login(response.data);
         if (loginSuccess) {
@@ -63,14 +75,13 @@ export default function LoginScreen() {
         }
       } else {
         Alert.alert('Error', response.data.message || 'Login failed');
+        setStep(1);
+        setOtp('');
       }
     } catch (error) {
-      console.error('Login error:', error);
-      Alert.alert(
-        'Error',
-        error.response?.data?.message ||
-          'Unable to connect to the server. Please try again.'
-      );
+      Alert.alert('Error', error.response?.data?.message || 'Unable to connect to the server. Please try again.');
+      setStep(1);
+      setOtp('');
     } finally {
       setLoading(false);
     }
@@ -102,30 +113,42 @@ export default function LoginScreen() {
                   value={employeeNumber}
                   onChangeText={setEmployeeNumber}
                   mode="outlined"
-                  style={styles.input
-
-                  }
-                  keyboardType="numeric"
-                />
-
-                <TextInput
-                  label="OTP"
-                  value={otp}
-                  onChangeText={setOtp}
-                  mode="outlined"
                   style={styles.input}
                   keyboardType="numeric"
-                  secureTextEntry
+                  editable={step === 1}
                 />
 
-                <Button
-                  mode="contained"
-                  onPress={handleLogin}
-                  style={styles.button}
-                  disabled={loading}
-                >
-                  {loading ? <ActivityIndicator color="#FFFFFF" /> : 'Sign In'}
-                </Button>
+                {step === 2 && (
+                  <TextInput
+                    label="OTP"
+                    value={otp}
+                    onChangeText={setOtp}
+                    mode="outlined"
+                    style={styles.input}
+                    keyboardType="numeric"
+                    secureTextEntry
+                  />
+                )}
+
+                {step === 1 ? (
+                  <Button
+                    mode="contained"
+                    onPress={handleSendOtp}
+                    style={styles.button}
+                    disabled={loading}
+                  >
+                    {loading ? <ActivityIndicator color="#FFFFFF" /> : 'Send OTP'}
+                  </Button>
+                ) : (
+                  <Button
+                    mode="contained"
+                    onPress={handleVerifyOtp}
+                    style={styles.button}
+                    disabled={loading}
+                  >
+                    {loading ? <ActivityIndicator color="#FFFFFF" /> : 'Login'}
+                  </Button>
+                )}
 
                 <View style={styles.demoInfo}>
                   <Text variant="bodySmall" style={styles.demoTitle}>

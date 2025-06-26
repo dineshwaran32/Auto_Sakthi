@@ -2,6 +2,8 @@ require('dotenv').config();
 const twilio = require('twilio');
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
+const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+console.log(accountSid, authToken);
 const client = twilio(accountSid, authToken);
 
 // Send verification code using Twilio Verify API
@@ -20,7 +22,7 @@ async function sendVerification({ to }) {
 
 // Check verification code using Twilio Verify API
 async function checkVerification({ to, code }) {
-  const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+  
   if (!verifyServiceSid) throw new Error('TWILIO_VERIFY_SERVICE_SID is not set in .env');
   try {
     const verificationCheck = await client.verify.v2.services(verifyServiceSid)

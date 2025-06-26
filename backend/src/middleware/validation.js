@@ -19,7 +19,7 @@ const validateRequest = (schema) => {
 const schemas = {
   login: Joi.object({
     employeeNumber: Joi.string().required(),
-    otp: Joi.string().length(4).required()
+    otp: Joi.string().length(6).required()
   }),
 
   createIdea: Joi.object({
@@ -46,6 +46,15 @@ const schemas = {
     department: Joi.string().valid('Engineering', 'Quality', 'Manufacturing', 'Management', 'Administration', 'HR', 'Finance').required(),
     designation: Joi.string().required(),
     role: Joi.string().valid('employee', 'reviewer', 'admin').default('employee')
+  }),
+
+  sendOtp: Joi.object({
+    employeeNumber: Joi.string().required()
+  }),
+
+  verifyOtp: Joi.object({
+    employeeNumber: Joi.string().required(),
+    otp: Joi.string().length(6).required()
   })
 };
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const { validateRequest, schemas } = require('../middleware/validation');
 const { auth } = require('../middleware/auth');
-const { login, getProfile, logout } = require('../controllers/authController');
+const { login, getProfile, logout, sendOtp, verifyOtp } = require('../controllers/authController');
 // const rateLimit = require('express-rate-limit');
 
 const router = express.Router();
@@ -32,5 +32,15 @@ router.get('/profile', auth, getProfile);
 // @desc    Logout user
 // @access  Private
 router.post('/logout', auth, logout);
+
+// @route   POST /api/auth/send-otp
+// @desc    Send OTP to employee's registered mobile
+// @access  Public
+router.post('/send-otp', validateRequest(schemas.sendOtp), sendOtp);
+
+// @route   POST /api/auth/verify-otp
+// @desc    Verify OTP and login
+// @access  Public
+router.post('/verify-otp', validateRequest(schemas.verifyOtp), verifyOtp);
 
 module.exports = router;
