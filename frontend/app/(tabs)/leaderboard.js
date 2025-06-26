@@ -2,70 +2,38 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
-  ScrollView,
   FlatList,
   Dimensions,
+  Image,
   Animated,
 } from 'react-native';
-import {
-  Text,
-  Card,
-  Avatar,
-  Chip,
-  SegmentedButtons,
-  Surface,
-} from 'react-native-paper';
+import { Text, Avatar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../context/UserContext';
 import api from '../../utils/api';
-import { theme, spacing } from '../../utils/theme';
+import { theme } from '../../utils/theme';
 
 const { width } = Dimensions.get('window');
 
-const AnimatedListItem = ({ children, index }) => {
-  const slideUp = useRef(new Animated.Value(50)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 500,
-      delay: index * 100,
-      useNativeDriver: true,
-    }).start();
-    Animated.timing(slideUp, {
-      toValue: 0,
-      duration: 500,
-      delay: index * 100,
-      useNativeDriver: true,
-    }).start();
-  }, [slideUp, opacity, index]);
-
-  return (
-    <Animated.View style={{ opacity, transform: [{ translateY: slideUp }] }}>
-      {children}
-    </Animated.View>
-  );
-};
-
 export default function LeaderboardScreen() {
   const { user } = useUser();
-  const [viewMode, setViewMode] = useState('individual');
   const [individualStats, setIndividualStats] = useState([]);
-  const [departmentStats, setDepartmentStats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
+
+  // Animation values
+  const podiumAnim = useRef(new Animated.Value(0)).current;
+  const currentUserAnim = useRef(new Animated.Value(0)).current;
+  const listAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       setLoading(true);
       try {
-        // Individual leaderboard
         const resInd = await api.get('/api/users/leaderboard?type=individual');
         setIndividualStats(resInd.data.data.leaderboard || []);
-        // Department leaderboard
-        const resDept = await api.get('/api/users/leaderboard?type=department');
-        setDepartmentStats(resDept.data.data.departmentLeaderboard || []);
       } catch (error) {
         console.error('Error loading leaderboard:', error);
       } finally {
@@ -75,110 +43,192 @@ export default function LeaderboardScreen() {
     fetchLeaderboard();
   }, []);
 
-  const currentUserRank = individualStats.findIndex(stat => stat.employeeNumber === user?.employeeNumber) + 1;
+  // Start animations when data loads
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!loading && individualStats.length > 0) {
+        // Reset animations first
+        podiumAnim.setValue(0);
+        currentUserAnim.setValue(0);
+        listAnim.setValue(0);
 
-  const renderIndividualRankItem = ({ item, index }) => {
-    const isCurrentUser = item.employeeNumber === user?.employeeNumber;
-    const rankColor = index < 3 ? ['#FFD700', '#C0C0C0', '#CD7F32'][index] : theme.colors.onSurfaceVariant;
+        // Animate podium first
+        Animated.timing(podiumAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }).start();
+
+        // Animate current user bar after podium
+        setTimeout(() => {
+          Animated.timing(currentUserAnim, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+          }).start();
+        }, 400);
+
+        // Animate list after current user bar
+        setTimeout(() => {
+          Animated.timing(listAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }).start();
+        }, 800);
+      }
+    }, [loading, individualStats])
+  );
+
+  const currentUserRank = individualStats.findIndex(stat => stat.employeeNumber === user?.employeeNumber);
+  const currentUserData = individualStats[currentUserRank];
+
+  const top3 = individualStats.slice(0, 3);
+  const others = individualStats.slice(3);
+
+  const renderPodium = () => {
+    if (loading || top3.length < 3) return null;
+  
+    const podiumOrder = [top3[1], top3[0], top3[2]]; // 2nd, 1st, 3rd
+  
     return (
-      <AnimatedListItem index={index}>
-        <Card style={[
-          styles.rankCard,
-          isCurrentUser && styles.currentUserCard
-        ]}>
-          <Card.Content style={styles.rankContentCompact}>
-            <Surface style={[styles.rankBadgeCompact, { backgroundColor: rankColor }]}>
-              <Text variant="titleSmall" style={styles.rankNumberCompact}>
-                {index + 1}
-              </Text>
-            </Surface>
-            <Avatar.Text
-              size={32}
-              label={item.name.split(' ').map(n => n[0]).join('')}
-              style={styles.userAvatarCompact}
-            />
-            <Text style={[styles.userNameCompact, isCurrentUser && styles.currentUserText]} numberOfLines={1}>
-              {item.name}{isCurrentUser ? ' (You)' : ''}
-            </Text>
-            <View style={styles.pointsContainer}>
-              <Text style={styles.statNumberCompact}>{item.creditPoints}</Text>
-              <MaterialIcons name="emoji-events" size={18} color={theme.colors.primary} style={{ marginLeft: 4 }} />
-            </View>
-          </Card.Content>
-        </Card>
-      </AnimatedListItem>
+      <Animated.View 
+        style={[
+          styles.podiumContainer,
+          {
+            opacity: podiumAnim,
+            transform: [{
+              translateY: podiumAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [50, 0],
+              })
+            }]
+          }
+        ]}
+      >
+        {podiumOrder.map((player, index) => {
+          const isFirst = player._id === top3[0]._id;
+          const position = isFirst ? 1 : (player._id === top3[1]._id ? 2 : 3);
+          
+          return (
+            <Animated.View 
+              key={player._id} 
+              style={[
+                styles.podiumItem, 
+                styles[`podiumItem${position}`],
+                {
+                  opacity: podiumAnim,
+                  transform: [{
+                    scale: podiumAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8, 1],
+                    })
+                  }]
+                }
+              ]}
+            >
+              <View style={styles.podiumAvatarContainer}>
+                {isFirst && <FontAwesome name="trophy" size={24} color="#FFD700" style={styles.crown} />}
+                <Avatar.Text
+                  size={isFirst ? 80 : 60}
+                  label={player.name.split(' ').map(n => n[0]).join('')}
+                  style={styles.podiumAvatar}
+                />
+              </View>
+              <Text style={styles.podiumName}>{player.name}</Text>
+              <Text style={styles.podiumPoints}>{player.creditPoints} points</Text>
+              <View style={[styles.podiumPillar, styles[`podiumPillar${position}`]]}>
+                <Text style={styles.podiumRank}>{position}</Text>
+              </View>
+            </Animated.View>
+          );
+        })}
+      </Animated.View>
+    );
+  };
+  
+  const renderCurrentUserBar = () => {
+    if (loading || currentUserRank < 3 || !currentUserData) return null;
+  
+    const actualRank = currentUserRank + 1; // Add 1 because array index starts at 0
+  
+    return (
+      <Animated.View 
+        style={[
+          styles.currentUserBar,
+          {
+            opacity: currentUserAnim,
+            transform: [{
+              translateX: currentUserAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-width, 0],
+              })
+            }]
+          }
+        ]}
+      >
+        <Text style={styles.listRank}>{actualRank}</Text>
+        <Avatar.Text
+          size={40}
+          label={currentUserData.name.split(' ').map(n => n[0]).join('')}
+        />
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <Text style={styles.currentUserText}>Points: {currentUserData.creditPoints}</Text>
+          <Text style={styles.currentUserText}>Level: Silver</Text>
+        </View>
+        <Text style={styles.currentUserText}>Position: #{actualRank}</Text>
+      </Animated.View>
     );
   };
 
-  const renderDepartmentRankItem = ({ item, index }) => (
-    <AnimatedListItem index={index}>
-      <Card style={styles.rankCard}>
-        <Card.Content style={styles.rankContentCompact}>
-          <Surface style={[styles.rankBadgeCompact, { 
-            backgroundColor: index < 3 ? ['#FFD700', '#C0C0C0', '#CD7F32'][index] : theme.colors.onSurfaceVariant 
-          }]}> 
-            <Text variant="titleSmall" style={styles.rankNumberCompact}>
-              {index + 1}
-            </Text>
-          </Surface>
-          <Avatar.Icon 
-            size={32} 
-            icon="business"
-            style={styles.deptAvatarCompact}
-          />
-          <Text style={styles.userNameCompact} numberOfLines={1}>
-            {item._id || item.department}
-          </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 'auto' }}>
-            <Text style={styles.statNumberCompact}>{item.employeeCount || ''}</Text>
-            <MaterialIcons name="groups" size={18} color={theme.colors.tertiary} style={{ marginLeft: 4, marginRight: 8 }} />
-            <Text style={styles.statNumberCompact}>{item.totalCreditPoints}</Text>
-            <MaterialIcons name="emoji-events" size={18} color={theme.colors.primary} style={{ marginLeft: 4 }} />
-          </View>
-        </Card.Content>
-      </Card>
-    </AnimatedListItem>
-  );
+  const renderRankItem = ({ item, index }) => {
+    const rank = index + 4;
+    return (
+      <Animated.View 
+        style={[
+          styles.listItem,
+          {
+            opacity: listAnim,
+            transform: [{
+              translateY: listAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [30, 0],
+              })
+            }]
+          }
+        ]}
+      >
+        <Text style={styles.listRank}>{rank}</Text>
+        <Avatar.Text
+          size={40}
+          label={item.name.split(' ').map(n => n[0]).join('')}
+        />
+        <Text style={styles.listName}>{item.name}</Text>
+        <Text style={styles.listPoints}>{item.creditPoints} points</Text>
+        <FontAwesome name="star" size={16} color="#D4AF37" />
+      </Animated.View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.headerTitle}>
-          Leaderboard
-        </Text>
-        {viewMode === 'individual' && currentUserRank > 0 && (
-          <Chip 
-            mode="outlined" 
-            style={styles.rankChip}
-          >
-            Your Rank: #{currentUserRank}
-          </Chip>
-        )}
-      </View>
-      <View style={styles.segmentContainer}>
-        <SegmentedButtons
-          value={viewMode}
-          onValueChange={setViewMode}
-          buttons={[
-            {
-              value: 'individual',
-              label: 'Individual',
-            },
-            {
-              value: 'department',
-              label: 'Department',
-            },
-          ]}
-        />
+        <Ionicons name="chevron-back" size={24} color="black" onPress={() => navigation.goBack()} />
+        <Text style={styles.headerTitle}>Leaderboard</Text>
+        <View style={{width: 24}} />
       </View>
       <FlatList
-        data={viewMode === 'individual' ? individualStats : departmentStats}
-        renderItem={viewMode === 'individual' ? renderIndividualRankItem : renderDepartmentRankItem}
-        keyExtractor={(item, index) => 
-          viewMode === 'individual' ? item.employeeNumber : (item._id || item.department)
-        }
-        contentContainerStyle={styles.list}
+        data={others}
+        renderItem={renderRankItem}
+        keyExtractor={item => item._id}
+        contentContainerStyle={[styles.list, { paddingBottom: 100 }]}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <>
+            {renderPodium()}
+            {renderCurrentUserBar()}
+          </>
+        }
       />
     </SafeAreaView>
   );
@@ -187,87 +237,127 @@ export default function LeaderboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#FFF7F0', // A light orange/peach background
   },
   header: {
-    padding: spacing.lg,
-    backgroundColor: theme.colors.surface,
-    elevation: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
   },
   headerTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
-    color: theme.colors.onSurface,
   },
-  rankChip: {
-    marginTop: spacing.sm,
-    alignSelf: 'flex-start',
-  },
-  segmentContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-  },
-  list: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  rankCard: {
-    marginBottom: spacing.md,
-    width: '100%',
-    alignSelf: 'center',
-    elevation: 2,
-  },
-  currentUserCard: {
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-  },
-  pointsContainer: {
+  podiumContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 'auto'
-  },
-  rankContentCompact: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-    minHeight: 0,
-  },
-  rankBadgeCompact: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.sm,
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+    marginBottom: 20,
   },
-  rankNumberCompact: {
-    fontWeight: 'bold',
-    color: theme.colors.onPrimary,
+  podiumItem: {
+    alignItems: 'center',
+    width: width / 3.5,
+  },
+  podiumItem1: {
+    // Styles for 1st place
+  },
+  podiumItem2: {
+    // Styles for 2nd place
+  },
+  podiumItem3: {
+    // Styles for 3rd place
+  },
+  podiumAvatarContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  crown: {
+    position: 'absolute',
+    top: -15,
+    zIndex: 1,
+  },
+  podiumAvatar: {
+    backgroundColor: '#E0E0E0'
+  },
+  podiumName: {
     fontSize: 14,
-  },
-  userAvatarCompact: {
-    marginRight: spacing.sm,
-    backgroundColor: theme.colors.primary,
-  },
-  userNameCompact: {
     fontWeight: 'bold',
-    color: theme.colors.onSurface,
-    fontSize: 14,
-    flexShrink: 1,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  podiumPoints: {
+    fontSize: 12,
+    color: '#666',
+  },
+  podiumPillar: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    backgroundColor: '#E6F5E4',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  podiumPillar1: {
+    height: 120,
+  },
+  podiumPillar2: {
+    height: 90,
+  },
+  podiumPillar3: {
+    height: 60,
+  },
+  podiumRank: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  currentUserBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FF6F61',
+    marginHorizontal: 16,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    elevation: 4,
   },
   currentUserText: {
-    color: theme.colors.primary,
-  },
-  statNumberCompact: {
+    color: 'white',
     fontWeight: 'bold',
-    color: theme.colors.primary,
-    fontSize: 14,
-    minWidth: 20,
-    textAlign: 'center',
   },
-  deptAvatarCompact: {
-    marginRight: spacing.sm,
-    backgroundColor: theme.colors.secondary,
+  list: {
+    paddingHorizontal: 16,
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    elevation: 2,
+  },
+  listRank: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    width: 30,
+    textAlign: 'center',
+    marginRight: 12,
+  },
+  listName: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 12,
+  },
+  listPoints: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#666',
+    marginRight: 8,
   },
 });

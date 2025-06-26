@@ -164,7 +164,7 @@ export default function HomeScreen() {
           )}
         </Animated.View>
       )}
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { paddingBottom: 100 }]}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.userInfo}>
@@ -332,7 +332,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   scrollContainer: {
-    paddingBottom: spacing.xl,
+    padding: spacing.md,
+    // paddingBottom: spacing.xl, // handled inline for floating nav bar
   },
   header: {
     padding: spacing.lg,
@@ -473,30 +474,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: spacing.md,
   },
   menuCard: {
-    width: (width - spacing.lg * 2 - spacing.md) / 2,
+    width: '48%',
     elevation: 2,
     marginBottom: spacing.md,
+    backgroundColor: theme.colors.surface,
   },
   menuContent: {
     alignItems: 'center',
-    paddingVertical: spacing.lg,
-    minHeight: 120,
     justifyContent: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    minHeight: 100,
+    textAlign: 'center',
   },
   menuIcon: {
     marginBottom: spacing.sm,
+    alignSelf: 'center',
   },
   menuTitle: {
     textAlign: 'center',
     fontWeight: 'bold',
     marginBottom: spacing.xs,
+    fontSize: 14,
   },
   menuSubtitle: {
     textAlign: 'center',
     color: theme.colors.onSurfaceVariant,
-    fontSize: 12,
+    fontSize: 11,
+    lineHeight: 14,
   },
 });

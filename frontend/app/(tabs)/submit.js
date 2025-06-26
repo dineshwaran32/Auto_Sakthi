@@ -563,7 +563,7 @@ export default function SubmitIdeaScreen() {
         </Text>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { paddingBottom: 100 }]}>
         <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
           {contentVisible && renderStepContent()}
         </Animated.View>
@@ -710,10 +710,10 @@ const styles = StyleSheet.create({
   },
   navigation: {
     flexDirection: 'row',
-    padding: spacing.lg,
-    backgroundColor: theme.colors.surface,
-    elevation: 2,
-    gap: spacing.md,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.lg,
+    marginBottom: 100,
   },
   navButton: {
     flex: 1,

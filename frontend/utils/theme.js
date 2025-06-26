@@ -1,17 +1,19 @@
 export const theme = {
   colors: {
-    primary: '#6200ee',
-    secondary: '#03dac6',
-    tertiary: '#018786',
-    success: '#4caf50',
-    error: '#f44336',
-    background: '#f6f6f6',
+    primary: '#34A853',
+    secondary: '#FF6F61',
+    tertiary: '#4285F4',
+    success: '#34A853',
+    error: '#EA4335',
+    background: '#FFF7F0',
     surface: '#ffffff',
-    surfaceVariant: '#eeeeee',
-    successContainer: '#e8f5e8',
-    onSurface: '#000000',
-    onSurfaceVariant: '#666666',
-    level3: '#e0e0e0',
+    surfaceVariant: '#E6F5E4',
+    successContainer: '#E6F5E4',
+    onSurface: '#202124',
+    onSurfaceVariant: '#5F6368',
+    onPrimary: '#ffffff',
+    primaryContainer: '#E6F5E4',
+    secondaryContainer: '#FCE8E6',
   },
 };
 
@@ -20,4 +22,4 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
-}; 
+};

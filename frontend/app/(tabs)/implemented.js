@@ -278,7 +278,8 @@ export default function ImplementedScreen() {
         keyExtractor={(item) => item._id || item.id}
         contentContainerStyle={[
           styles.list,
-          filteredIdeas.length === 0 && styles.emptyList
+          filteredIdeas.length === 0 && styles.emptyList,
+          { paddingBottom: 100 }
         ]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderEmptyState}
