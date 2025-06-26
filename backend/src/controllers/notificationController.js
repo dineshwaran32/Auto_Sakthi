@@ -1,7 +1,7 @@
 const Notification = require('../models/Notification');
 const { sendMessage } = require('../services/twilioService');
 
-const getNotifications = async (req, res) => {
+async function getNotifications(req, res) {
   try {
     const { page = 1, limit = 20, isRead } = req.query;
     
@@ -41,9 +41,9 @@ const getNotifications = async (req, res) => {
       message: 'Server error while fetching notifications'
     });
   }
-};
+}
 
-const markAsRead = async (req, res) => {
+async function markAsRead(req, res) {
   try {
     const notification = await Notification.findOneAndUpdate(
       { _id: req.params.id, recipient: req.user._id },
@@ -71,9 +71,9 @@ const markAsRead = async (req, res) => {
       message: 'Server error while updating notification'
     });
   }
-};
+}
 
-const markAllAsRead = async (req, res) => {
+async function markAllAsRead(req, res) {
   try {
     await Notification.updateMany(
       { recipient: req.user._id, isRead: false },
@@ -92,12 +92,12 @@ const markAllAsRead = async (req, res) => {
       message: 'Server error while updating notifications'
     });
   }
-};
+}
 
 // @desc    Send a Twilio SMS message
 // @route   POST /api/notifications/twilio-message
 // @access  Private
-exports.sendTwilioMessage = async (req, res) => {
+async function sendTwilioMessage(req, res) {
   const { to, body } = req.body;
   try {
     const message = await sendMessage({
@@ -108,7 +108,7 @@ exports.sendTwilioMessage = async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
-};
+}
 
 module.exports = {
   getNotifications,

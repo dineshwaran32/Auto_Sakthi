@@ -606,7 +606,7 @@ export default function SubmitIdeaScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: "#fff",
   },
   header: {
     padding: spacing.lg,
@@ -647,6 +647,7 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: spacing.md,
+    backgroundColor: "#fff",
   },
   radioOption: {
     flexDirection: 'row',

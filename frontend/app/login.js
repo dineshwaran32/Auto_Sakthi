@@ -21,7 +21,7 @@ import { useUser } from '../context/UserContext';
 import { theme, spacing } from '../utils/theme';
 import api from '../utils/api';
 import { useRouter } from 'expo-router';
-import logo from '../assets/images/logo.png';
+import logo from '../assets/images/logo_new.png';
 
 export default function LoginScreen() {
   const [employeeNumber, setEmployeeNumber] = useState('');
@@ -102,7 +102,9 @@ export default function LoginScreen() {
                   value={employeeNumber}
                   onChangeText={setEmployeeNumber}
                   mode="outlined"
-                  style={styles.input}
+                  style={styles.input
+
+                  }
                   keyboardType="numeric"
                 />
 
@@ -188,6 +190,7 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: spacing.md,
+    backgroundColor:'#fff',
   },
   button: {
     marginTop: spacing.md,

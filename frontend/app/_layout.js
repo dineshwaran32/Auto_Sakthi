@@ -10,6 +10,8 @@ import { useIdeaLoader } from '../hooks/useIdeaLoader';
 import { theme as customTheme } from '../utils/theme';
 import { TransitionPresets } from '@react-navigation/stack';
 import { LogBox } from 'react-native';
+
+// Suppress useInsertionEffect warning globally
 LogBox.ignoreLogs(['Warning: useInsertionEffect must not schedule updates.']);
 
 const theme = {
