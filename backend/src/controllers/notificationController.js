@@ -1,4 +1,5 @@
 const Notification = require('../models/Notification');
+const { sendMessage } = require('../services/twilioService');
 
 const getNotifications = async (req, res) => {
   try {
@@ -93,8 +94,25 @@ const markAllAsRead = async (req, res) => {
   }
 };
 
+// @desc    Send a Twilio SMS message
+// @route   POST /api/notifications/twilio-message
+// @access  Private
+exports.sendTwilioMessage = async (req, res) => {
+  const { to, body } = req.body;
+  try {
+    const message = await sendMessage({
+      to: to || process.env.TWILIO_TO_NUMBER,
+      body: body || 'Hello from Sakthi_Auto!',
+    });
+    res.status(200).json({ success: true, sid: message.sid });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   getNotifications,
   markAsRead,
-  markAllAsRead
+  markAllAsRead,
+  sendTwilioMessage
 };
