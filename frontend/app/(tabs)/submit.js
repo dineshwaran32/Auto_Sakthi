@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,6 +7,8 @@ import {
   Platform,
   Linking,
   Image,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import {
   Text,
@@ -25,6 +27,8 @@ import { useRouter } from 'expo-router';
 import { useUser } from '../../context/UserContext';
 import { useIdeas } from '../../context/IdeaContext';
 import { theme, spacing } from '../../utils/theme';
+
+const { width } = Dimensions.get('window');
 
 const STEPS = [
   'Basic Info',
@@ -49,6 +53,12 @@ export default function SubmitIdeaScreen() {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [resetCounter, setResetCounter] = useState(0);
+
+  // Animation state
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const [contentVisible, setContentVisible] = useState(true);
+  const prevStepRef = useRef(currentStep);
+
   const [formData, setFormData] = useState({
     title: '',
     problem: '',
@@ -95,7 +105,27 @@ export default function SubmitIdeaScreen() {
   // Monitor current step changes for debugging
   useEffect(() => {
     console.log('Current step changed to:', currentStep);
-  }, [currentStep]);
+
+    const isNavigatingForward = currentStep > prevStepRef.current;
+    prevStepRef.current = currentStep;
+
+    // Hide and slide out
+    Animated.timing(slideAnim, {
+      toValue: isNavigatingForward ? -width : width,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      // After sliding out, update content and slide back in
+      setContentVisible(false); // This is very brief, might not be needed
+      slideAnim.setValue(isNavigatingForward ? width : -width);
+      setContentVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, [currentStep, slideAnim]);
 
   const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -534,7 +564,9 @@ export default function SubmitIdeaScreen() {
       </View>
 
       <ScrollView style={styles.content}>
-        {renderStepContent()}
+        <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
+          {contentVisible && renderStepContent()}
+        </Animated.View>
       </ScrollView>
 
       <View style={styles.navigation}>
@@ -628,31 +660,35 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   imageContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
     marginTop: spacing.md,
   },
   imageItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flex: 1,
+    minWidth: 120,
+    maxWidth: '45%',
+    aspectRatio: 1,
+    elevation: 2,
+    borderRadius: theme.roundness,
+    overflow: 'hidden',
     justifyContent: 'space-between',
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderRadius: 8,
-    elevation: 1,
   },
   imagePreview: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
+    width: '100%',
+    flex: 1,
   },
   imageActions: {
-    flex: 1,
+    padding: spacing.sm,
+    backgroundColor: 'rgba(0,0,0,0.4)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginLeft: spacing.md,
   },
   imageText: {
-    color: theme.colors.onSurface,
+    color: 'white',
+    flex: 1,
   },
   reviewCard: {
     elevation: 2,
