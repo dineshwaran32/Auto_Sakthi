@@ -112,14 +112,14 @@ export default function HomeScreen() {
       title: 'Leaderboard',
       subtitle: 'Top contributors',
       icon: 'leaderboard',
-      color: theme.colors.tertiary,
+      color: theme.colors.primary,
       route: 'leaderboard',
     },
     {
       title: 'Implemented',
       subtitle: `${implementedIdeas.length} success stories`,
       icon: 'check-circle',
-      color: theme.colors.success,
+      color: theme.colors.primary,
       route: 'implemented',
     },
   ];
@@ -195,7 +195,7 @@ export default function HomeScreen() {
 
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
-          <Card style={[styles.statCard, { backgroundColor: theme.colors.primaryContainer }]}>
+          <Card style={[styles.statCard, { backgroundColor: theme.colors.onPrimary }]}>
             <Card.Content style={styles.statContent}>
               <Text variant="headlineMedium" style={styles.statNumber}>
                 {approvedIdeas.length}

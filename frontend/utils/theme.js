@@ -1,11 +1,11 @@
 export const theme = {
   colors: {
-    primary: '#34A853',
-    secondary: '#FF6F61',
-    tertiary: '#4285F4',
+    primary: '#fd7e14',
+    secondary: '#fd7e14',
+    tertiary: '#ffc107',
     success: '#34A853',
     error: '#EA4335',
-    background: '#FFF7F0',
+    background: '#939ca3',
     surface: '#ffffff',
     surfaceVariant: '#E6F5E4',
     successContainer: '#E6F5E4',

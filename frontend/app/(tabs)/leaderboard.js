@@ -128,7 +128,7 @@ export default function LeaderboardScreen() {
               ]}
             >
               <View style={styles.podiumAvatarContainer}>
-                {isFirst && <FontAwesome name="trophy" size={24} color="#FFD700" style={styles.crown} />}
+                {isFirst && <FontAwesome name="trophy" size={24} color="#ffc107" style={styles.crown} />}
                 <Avatar.Text
                   size={isFirst ? 80 : 60}
                   label={player.name.split(' ').map(n => n[0]).join('')}
@@ -237,7 +237,7 @@ export default function LeaderboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF7F0', // A light orange/peach background
+    backgroundColor: '#939ca3', // A light orange/peach background
   },
   header: {
     flexDirection: 'row',
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    backgroundColor: '#E6F5E4',
+    backgroundColor: '#ffc107',
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
   },

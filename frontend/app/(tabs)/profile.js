@@ -106,7 +106,7 @@ export default function ProfileScreen() {
             </Text>
             <View style={styles.statsGrid}>
               <View style={styles.statItem}>
-                <Surface style={[styles.statIcon, { backgroundColor: theme.colors.primaryContainer }]}>
+                <Surface style={[styles.statIcon, { backgroundColor: theme.colors.tertiaryContainer }]}>
                   <MaterialIcons name="lightbulb" size={24} color={theme.colors.primary} />
                 </Surface>
                 <Text variant="headlineSmall" style={styles.statNumber}>
@@ -118,8 +118,8 @@ export default function ProfileScreen() {
               </View>
               
               <View style={styles.statItem}>
-                <Surface style={[styles.statIcon, { backgroundColor: theme.colors.successContainer }]}>
-                  <MaterialIcons name="check-circle" size={24} color={theme.colors.success} />
+                <Surface style={[styles.statIcon, { backgroundColor: theme.colors.tertiaryContainer }]}>
+                  <MaterialIcons name="check-circle" size={24} color={theme.colors.primary} />
                 </Surface>
                 <Text variant="headlineSmall" style={styles.statNumber}>
                   {approvedIdeas.length}
@@ -131,7 +131,7 @@ export default function ProfileScreen() {
               
               <View style={styles.statItem}>
                 <Surface style={[styles.statIcon, { backgroundColor: theme.colors.tertiaryContainer }]}>
-                  <MaterialIcons name="build" size={24} color={theme.colors.tertiary} />
+                  <MaterialIcons name="build" size={24} color={theme.colors.primary} />
                 </Surface>
                 <Text variant="headlineSmall" style={styles.statNumber}>
                   {implementedIdeas.length}
@@ -185,7 +185,7 @@ export default function ProfileScreen() {
                 </Text>
               </View>
               <View style={styles.breakdownItem}>
-                <MaterialIcons name="check-circle" size={16} color={theme.colors.success} />
+                <MaterialIcons name="check-circle" size={16} color={theme.colors.primary} />
                 <Text variant="bodyMedium" style={styles.breakdownLabel}>
                   Ideas Approved ({approvedIdeas.length})
                 </Text>
@@ -194,7 +194,7 @@ export default function ProfileScreen() {
                 </Text>
               </View>
               <View style={styles.breakdownItem}>
-                <MaterialIcons name="build" size={16} color={theme.colors.tertiary} />
+                <MaterialIcons name="build" size={16} color={theme.colors.primary} />
                 <Text variant="bodyMedium" style={styles.breakdownLabel}>
                   Ideas Implemented ({implementedIdeas.length})
                 </Text>
