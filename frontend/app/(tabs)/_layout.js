@@ -15,7 +15,7 @@ const TabBarIcon = ({ name, color, focused }) => {
       width: 40,
       height: 40,
     }}>
-      <MaterialIcons name={name} size={24} color={focused ? '#34A853' : color} />
+      <MaterialIcons name={name} size={24} color={focused ? '#fd7e14' : color} />
     </View>
   );
 };
@@ -37,7 +37,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#34A853',
+        tabBarActiveTintColor: '#fd7e14',
         tabBarInactiveTintColor: '#8E8E93',
         tabBarShowLabel: true,
         tabBarLabelStyle: { fontSize: 12, marginBottom: 2, fontWeight: '500' },

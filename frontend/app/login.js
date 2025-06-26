@@ -6,13 +6,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
 import {
   Text,
   TextInput,
   Button,
   Card,
-  Title,
   Paragraph,
   ActivityIndicator,
 } from 'react-native-paper';
@@ -21,6 +21,7 @@ import { useUser } from '../context/UserContext';
 import { theme, spacing } from '../utils/theme';
 import api from '../utils/api';
 import { useRouter } from 'expo-router';
+import logo from '../assets/images/logo.png';
 
 export default function LoginScreen() {
   const [employeeNumber, setEmployeeNumber] = useState('');
@@ -51,12 +52,12 @@ export default function LoginScreen() {
       });
 
       console.log('Login response:', response.data);
-      console.log("Response data user :", response.data.data);
+      console.log('Response data user:', response.data.data);
 
       if (response.data.success) {
         const loginSuccess = await login(response.data);
         if (loginSuccess) {
-          router.replace('/(tabs)'); // Navigate to tabs root for all users
+          router.replace('/(tabs)');
         } else {
           Alert.alert('Error', 'Failed to save login data');
         }
@@ -67,7 +68,8 @@ export default function LoginScreen() {
       console.error('Login error:', error);
       Alert.alert(
         'Error',
-        error.response?.data?.message || 'Unable to connect to the server. Please try again.'
+        error.response?.data?.message ||
+          'Unable to connect to the server. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -76,14 +78,14 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.content}>
             <View style={styles.header}>
-              <Title style={styles.title}>Kaizen Ideas</Title>
+              <Image source={logo} style={styles.logo} />
               <Paragraph style={styles.subtitle}>
                 Continuous Improvement Platform
               </Paragraph>
@@ -94,7 +96,7 @@ export default function LoginScreen() {
                 <Text variant="headlineSmall" style={styles.cardTitle}>
                   Sign In
                 </Text>
-                
+
                 <TextInput
                   label="Employee Number"
                   value={employeeNumber}
@@ -164,15 +166,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.xl,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-    marginBottom: spacing.sm,
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: spacing.md,
+    resizeMode: 'contain',
+    borderRadius : 20,
   },
   subtitle: {
     fontSize: 16,
-    color: theme.colors.onSurfaceVariant,
+    color: '#fff',
     textAlign: 'center',
   },
   card: {
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     textAlign: 'center',
     marginBottom: spacing.lg,
-    color: theme.colors.onSurface,
+    color: theme.colors.primary,
   },
   input: {
     marginBottom: spacing.md,
