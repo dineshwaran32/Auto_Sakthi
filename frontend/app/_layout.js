@@ -8,6 +8,9 @@ import { IdeaProvider, useIdeas } from '../context/IdeaContext';
 import { useFrameworkReady } from '../hooks/useFrameworkReady';
 import { useIdeaLoader } from '../hooks/useIdeaLoader';
 import { theme as customTheme } from '../utils/theme';
+import { TransitionPresets } from '@react-navigation/stack';
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['Warning: useInsertionEffect must not schedule updates.']);
 
 const theme = {
   ...DefaultTheme,
@@ -36,7 +39,7 @@ function AppContent() {
   return (
     <>
       <ContextConnector />
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack screenOptions={{ headerShown: false, ...TransitionPresets.SlideFromRightIOS }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="+not-found" />
       </Stack>

@@ -40,22 +40,13 @@ export default function ProfileScreen() {
   const implementedPoints = implementedIdeas.length * 30;
   const totalCalculatedPoints = submittedPoints + approvedPoints + implementedPoints;
   
-  const handleLogout = () => {
-    Alert.alert(
-      'Confirm Logout',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
-          onPress: async () => {
-            await logout();
-            router.replace('/');
-          }, 
-          style: 'destructive' 
-        },
-      ]
-    );
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const handleRefreshProfile = async () => {
@@ -80,7 +71,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { paddingBottom: 100 }]}>
         
         {/* Profile Header */}
         <Card style={styles.profileCard}>
