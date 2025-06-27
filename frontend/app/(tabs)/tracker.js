@@ -189,7 +189,7 @@ export default function TrackerScreen() {
       <MaterialIcons 
         name="lightbulb-outline" 
         size={64} 
-        color={theme.colors.onSurfaceVariant} 
+        color={theme.colors.primary} 
       />
       <Text variant="headlineSmall" style={styles.emptyTitle}>
         No ideas found
@@ -363,11 +363,11 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     marginBottom: spacing.md,
     fontWeight: 'bold',
-    color: theme.colors.onSurfaceVariant,
+    color: '#fff',
   },
   emptyText: {
     textAlign: 'center',
-    color: theme.colors.onSurfaceVariant,
+    color: theme.colors.tertiary,
     lineHeight: 20,
   },
   emptyList: {

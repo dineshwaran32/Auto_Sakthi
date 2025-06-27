@@ -213,7 +213,7 @@ export default function ImplementedScreen() {
       <MaterialIcons 
         name="build-circle" 
         size={64} 
-        color={theme.colors.onSurfaceVariant} 
+        color={theme.colors.secondary} 
       />
       <Text variant="headlineSmall" style={styles.emptyTitle}>
         No implemented ideas found
@@ -410,16 +410,18 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     paddingHorizontal: spacing.xl,
+    
   },
   emptyTitle: {
     marginTop: spacing.lg,
+    textAlign: 'center',
     marginBottom: spacing.md,
     fontWeight: 'bold',
-    color: theme.colors.onSurfaceVariant,
+    color: '#fff',
   },
   emptyText: {
     textAlign: 'center',
-    color: theme.colors.onSurfaceVariant,
+    color: theme.colors.tertiary,
     lineHeight: 20,
   },
   emptyList: {

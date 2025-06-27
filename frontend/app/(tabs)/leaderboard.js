@@ -35,6 +35,7 @@ export default function LeaderboardScreen() {
         const resInd = await api.get('/api/users/leaderboard?type=individual');
         setIndividualStats(resInd.data.data.leaderboard || []);
       } catch (error) {
+        // Only log to console, do not show any error UI
         console.error('Error loading leaderboard:', error);
       } finally {
         setLoading(false);
@@ -42,6 +43,7 @@ export default function LeaderboardScreen() {
     };
     fetchLeaderboard();
   }, []);
+
 
   // Start animations when data loads
   useFocusEffect(
@@ -205,7 +207,7 @@ export default function LeaderboardScreen() {
         />
         <Text style={styles.listName}>{item.name}</Text>
         <Text style={styles.listPoints}>{item.creditPoints} points</Text>
-        <FontAwesome name="star" size={16} color="#D4AF37" />
+        <FontAwesome name="star" size={16} color="#fd7e14" />
       </Animated.View>
     );
   };
@@ -237,7 +239,7 @@ export default function LeaderboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#939ca3', // A light orange/peach background
+    backgroundColor: '#525b61', // A light orange/peach background
   },
   header: {
     flexDirection: 'row',
@@ -248,6 +250,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#fff',
   },
   podiumContainer: {
     flexDirection: 'row',
@@ -289,15 +292,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 8,
+    color : '#fcebde',
   },
   podiumPoints: {
     fontSize: 12,
-    color: '#666',
+    color: '#fff',
   },
   podiumPillar: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
+    width: '80%',
     backgroundColor: '#ffc107',
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,

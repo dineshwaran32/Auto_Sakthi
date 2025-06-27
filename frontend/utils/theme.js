@@ -5,15 +5,15 @@ export const theme = {
     tertiary: '#ffc107',
     success: '#34A853',
     error: '#EA4335',
-    background: '#939ca3',
+    background: '#525b61', //grey background
     surface: '#ffffff',
-    surfaceVariant: '#E6F5E4',
+    surfaceVariant: '#E6F5E4', //white with green
     successContainer: '#E6F5E4',
-    onSurface: '#202124',
-    onSurfaceVariant: '#5F6368',
+    onSurface: '#202124', //dark  black with blue
+    onSurfaceVariant: '#5F6368', // grey light
     onPrimary: '#ffffff',
-    primaryContainer: '#E6F5E4',
-    secondaryContainer: '#FCE8E6',
+    primaryContainer: '#E6F5E4',  //white with green
+    secondaryContainer: '#FCE8E6', //white with red
   },
 };
 

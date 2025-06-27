@@ -5,6 +5,7 @@ import {
   ScrollView,
   Dimensions,
   Animated,
+  BackHandler,
 } from 'react-native';
 import {
   Text,
@@ -26,7 +27,7 @@ import { useIdeas } from '../../context/IdeaContext';
 import { theme, spacing } from '../../utils/theme';
 import api from '../../utils/api';
 
-const { width } = Dimensions.get('window');
+const { width, height: windowHeight } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -48,7 +49,8 @@ export default function HomeScreen() {
       setNotifications(res.data.data.notifications);
       setUnreadCount(res.data.data.unreadCount);
     } catch (err) {
-      // Optionally handle error
+      // Only log to console, do not show any error UI
+      console.error('Notification fetch error:', err);
     } finally {
       setLoadingNotifications(false);
     }
@@ -62,14 +64,20 @@ export default function HomeScreen() {
     try {
       await api.put(`/api/notifications/${id}/read`);
       fetchNotifications();
-    } catch (err) {}
+    } catch (err) {
+      // Only log to console, do not show any error UI
+      console.error('Notification markAsRead error:', err);
+    }
   };
 
   const markAllAsRead = async () => {
     try {
       await api.put('/api/notifications/read-all');
       fetchNotifications();
-    } catch (err) {}
+    } catch (err) {
+      // Only log to console, do not show any error UI
+      console.error('Notification markAllAsRead error:', err);
+    }
   };
 
   const showBellPopup = () => {
@@ -124,45 +132,75 @@ export default function HomeScreen() {
     },
   ];
 
+  // Handle Android/iOS hardware back button to close notification drawer
+  useEffect(() => {
+    if (!bellVisible) return;
+    const onBackPress = () => {
+      if (bellVisible) {
+        hideBellPopup();
+        return true; // prevent default back action
+      }
+      return false;
+    };
+    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => subscription.remove();
+  }, [bellVisible]);
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Side Notification Drawer */}
       {bellVisible && (
-        <Animated.View style={[styles.bellDrawer, { right: slideAnim }]}> 
-          <View style={styles.bellDrawerHeader}>
-            <Text style={styles.bellDrawerTitle}>Notifications</Text>
-            <IconButton icon="close" size={24} onPress={hideBellPopup} />
-          </View>
-          <Button mode="text" onPress={markAllAsRead} disabled={unreadCount === 0}>
-            Mark all as read
-          </Button>
-          {loadingNotifications ? (
-            <Text>Loading...</Text>
-          ) : notifications.length === 0 ? (
-            <Text style={styles.bellDrawerText}>No notifications yet.</Text>
-          ) : (
-            <ScrollView style={{ width: '100%' }}>
-              {notifications.map((n) => (
-                <Card key={n._id} style={{ marginBottom: 8, backgroundColor: n.isRead ? '#f5f5f5' : '#e3f2fd' }}>
-                  <Card.Content>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ fontWeight: 'bold' }}>{n.title}</Text>
-                        <Paragraph>{n.message}</Paragraph>
-                        <Text style={{ fontSize: 12, color: '#888' }}>{new Date(n.createdAt).toLocaleString()}</Text>
+        <>
+          {/* Overlay to close drawer when tapping outside */}
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.1)',
+              zIndex: 99,
+            }}
+            onStartShouldSetResponder={() => true}
+            onResponderRelease={hideBellPopup}
+          />
+          <Animated.View style={[styles.bellDrawer, { right: slideAnim, maxHeight: windowHeight - 40 }]}> 
+            <View style={styles.bellDrawerHeader}>
+              <Text style={styles.bellDrawerTitle}>Notifications</Text>
+              <IconButton icon="close" size={24} onPress={hideBellPopup} />
+            </View>
+            <Button mode="text" onPress={markAllAsRead} disabled={unreadCount === 0}>
+              Mark all as read
+            </Button>
+            {loadingNotifications ? (
+              <Text>Loading...</Text>
+            ) : notifications.length === 0 ? (
+              <Text style={styles.bellDrawerText}>No notifications yet.</Text>
+            ) : (
+              <ScrollView style={{ width: '100%', flexGrow: 0, maxHeight: windowHeight - 180 }}>
+                {notifications.map((n) => (
+                  <Card key={n._id} style={{ marginBottom: 8, backgroundColor: n.isRead ? '#f5f5f5' : '#e3f2fd' }}>
+                    <Card.Content>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontWeight: 'bold' }}>{n.title}</Text>
+                          <Paragraph>{n.message}</Paragraph>
+                          <Text style={{ fontSize: 12, color: '#888' }}>{new Date(n.createdAt).toLocaleString()}</Text>
+                        </View>
+                        {!n.isRead && (
+                          <Button mode="text" onPress={() => markAsRead(n._id)} compact>
+                            Mark as read
+                          </Button>
+                        )}
                       </View>
-                      {!n.isRead && (
-                        <Button mode="text" onPress={() => markAsRead(n._id)} compact>
-                          Mark as read
-                        </Button>
-                      )}
-                    </View>
-                  </Card.Content>
-                </Card>
-              ))}
-            </ScrollView>
-          )}
-        </Animated.View>
+                    </Card.Content>
+                  </Card>
+                ))}
+              </ScrollView>
+            )}
+          </Animated.View>
+        </>
       )}
       <ScrollView contentContainerStyle={[styles.scrollContainer, { paddingBottom: 100 }]}>
         {/* Header */}
@@ -220,7 +258,7 @@ export default function HomeScreen() {
 
         {/* Recent Activity */}
         <View style={styles.section}>
-          <Text variant="headlineSmall" style={styles.sectionTitle}>
+          <Text variant="headlineSmall" style={styles.sectionfornew}>
             Your Recent Ideas
           </Text>
           
@@ -275,7 +313,7 @@ export default function HomeScreen() {
 
         {/* Menu Grid */}
         <View style={styles.menuContainer}>
-          <Text variant="headlineSmall" style={styles.sectionTitle}>
+          <Text variant="headlineSmall" style={styles.sectionfornew}>
             Quick Actions
           </Text>
           <View style={styles.menuGrid}>
@@ -390,6 +428,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: theme.colors.onSurface,
   },
+  sectionfornew : {
+  marginBottom: spacing.md,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
   activityCard: {
     marginBottom: spacing.sm,
     elevation: 1,
@@ -434,7 +477,6 @@ const styles = StyleSheet.create({
   bellDrawer: {
     position: 'absolute',
     top: 0,
-    bottom: 0,
     width: 320,
     backgroundColor: 'white',
     elevation: 8,

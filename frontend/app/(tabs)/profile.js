@@ -45,6 +45,7 @@ export default function ProfileScreen() {
       await logout();
       router.replace('/(tabs)');
     } catch (error) {
+      // Only log to console, do not show any error UI
       console.error('Logout error:', error);
     }
   };
@@ -54,7 +55,9 @@ export default function ProfileScreen() {
       await refreshUser();
       Alert.alert('Success', 'Profile data refreshed successfully!');
     } catch (error) {
+      // Only show Alert, do not show any error UI
       Alert.alert('Error', 'Failed to refresh profile data. Please try again.');
+      console.error('Profile refresh error:', error);
     }
   };
 
@@ -225,27 +228,27 @@ export default function ProfileScreen() {
             <List.Item
               title="Employee Number"
               description={user.employeeNumber}
-              left={props => <List.Icon {...props} icon="card-account-details" />}
+              left={props => <List.Icon {...props} icon="card-account-details" color={theme.colors.primary} />}
             />
             <Divider />
             
             <List.Item
               title="Role"
               description={user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-              left={props => <List.Icon {...props} icon="account-circle" />}
+              left={props => <List.Icon {...props} icon="account-circle" color={theme.colors.primary}/>}
             />
             <Divider />
             
             <List.Item
               title="Member Since"
               description={formatJoinDate()}
-              left={props => <List.Icon {...props} icon="calendar-today" />}
+              left={props => <List.Icon {...props} icon="calendar-today" color={theme.colors.primary}/>}
             />
           </Card.Content>
         </Card>
 
         {/* Settings */}
-        <Card style={styles.settingsCard}>
+        {/* <Card style={styles.settingsCard}>
           <Card.Content>
             <Text variant="titleLarge" style={styles.sectionTitle}>
               Settings
@@ -268,7 +271,7 @@ export default function ProfileScreen() {
               onPress={() => Alert.alert('Coming Soon', 'Privacy settings will be available in the next update.')}
             />
           </Card.Content>
-        </Card>
+        </Card> */}
 
         {/* Logout Button */}
         <Button
@@ -276,9 +279,8 @@ export default function ProfileScreen() {
           onPress={handleLogout}
           style={styles.logoutButton}
           icon="logout"
-          textColor={theme.colors.error}
-        >
-          Sign Out
+          textColor={'#FFF7F0'}
+        >Sign Out
         </Button>
       </ScrollView>
     </SafeAreaView>
@@ -302,8 +304,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   avatar: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.secondary,
     marginBottom: spacing.md,
+    color : theme.colors.onPrimary,
   },
   profileInfo: {
     alignItems: 'center',
@@ -332,7 +335,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontWeight: 'bold',
     marginBottom: spacing.md,
-    color: theme.colors.onSurface,
+    color: theme.colors.primary,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -373,7 +376,8 @@ const styles = StyleSheet.create({
   logoutButton: {
     marginHorizontal: spacing.lg,
     marginBottom: spacing.lg,
-    borderColor: theme.colors.error,
+    borderColor: theme.colors.primary,
+    backgroundColor : theme.colors.primary,
   },
   creditPointsHeader: {
     flexDirection: 'row',

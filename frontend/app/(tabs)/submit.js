@@ -305,6 +305,7 @@ export default function SubmitIdeaScreen() {
         ]
       );
     } catch (error) {
+      // Only log to console, do not show any error UI except Alert
       console.error('Submit error:', error);
       Alert.alert('Error', 'Failed to submit idea. Please check your input and try again.');
     } finally {
