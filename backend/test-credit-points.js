@@ -3,7 +3,7 @@ const Idea = require('./src/models/Idea');
 const User = require('./src/models/User');
 
 // Connect to MongoDB
-mongoose.connect("mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Kaizen_Idea?retryWrites=true&w=majority&appName=Cluster0")
+mongoose.connect("mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Sakthi_Spark?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 

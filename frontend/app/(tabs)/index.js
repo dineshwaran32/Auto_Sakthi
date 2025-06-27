@@ -259,7 +259,7 @@ export default function HomeScreen() {
                   No ideas yet
                 </Text>
                 <Text variant="bodyMedium" style={styles.emptyText}>
-                  Start your Kaizen journey by submitting your first improvement idea!
+                  Start your Sakthi Spark journey by submitting your first improvement idea!
                 </Text>
                 <Button 
                   mode="contained" 

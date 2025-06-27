@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Kaizen Ideas",
-    "slug": "kaizen-ideas-app",
+    "name": "Sakthi Spark",
+    "slug": "sakthi-spark",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "kaizen-app",
+    "icon": "./assets/images/logo_new.png",
+    "scheme": "Sakthi-app",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
@@ -21,7 +21,7 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/logo_new.png"
     },
     "plugins": ["expo-router", "expo-font", "expo-web-browser", "expo-image-picker"],
     "experiments": {

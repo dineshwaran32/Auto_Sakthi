@@ -1,7 +1,7 @@
 {
-  "name": "sakthi-auto-kaizen",
+  "name": "sakthi-auto-spark",
   "version": "1.0.0",
-  "description": "Kaizen Ideas Management System for Sakthi Auto",
+  "description": "Sakthi Spark Management System for Sakthi Auto",
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
@@ -18,13 +18,18 @@
     "concurrently": "^8.2.2"
   },
   "keywords": [
-    "kaizen",
+    "sakthi",
+    "spark",
     "ideas",
+    "management",
+    "employee",
+    "innovation",
     "continuous-improvement",
     "react-native",
     "expo",
-    "mongodb",
-    "express"
+    "nodejs",
+    "express",
+    "mongodb"
   ],
   "author": "Sakthi Auto Team",
   "license": "MIT"

@@ -1,7 +1,7 @@
 {
-  "name": "kaizen-ideas-backend",
+  "name": "sakthi-spark-backend",
   "version": "1.0.0",
-  "description": "Backend API for Kaizen Ideas App",
+  "description": "Backend API for Sakthi Spark App",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -29,11 +29,17 @@
     "supertest": "^6.3.3"
   },
   "keywords": [
-    "kaizen",
+    "sakthi",
+    "spark",
     "ideas",
+    "management",
+    "employee",
+    "innovation",
     "continuous-improvement",
+    "nodejs",
+    "express",
     "mongodb",
-    "express"
+    "api"
   ],
   "author": "Your Name",
   "license": "MIT"

@@ -14,7 +14,7 @@ if (!process.env.JWT_EXPIRES_IN) {
 
 // Set fallback MONGODB_URI if not provided
 if (!process.env.MONGODB_URI) {
-  process.env.MONGODB_URI = 'mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Kaizen_Idea?retryWrites=true&w=majority&appName=Cluster0';
+  process.env.MONGODB_URI = 'mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Sakthi_Spark?retryWrites=true&w=majority&appName=Cluster0';
   console.warn('⚠️  MONGODB_URI not set, using localhost. Set MONGODB_URI in production!');
 }
 
@@ -97,12 +97,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static('uploads'));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({
-    success: true,
-    message: 'Kaizen Ideas API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+    status: 'success',
+    message: 'Sakthi Spark API is running',
+    timestamp: new Date().toISOString()
   });
 });
 

@@ -1,160 +1,159 @@
-# Kaizen Ideas: A Modern Employee Innovation Management Platform
+# Sakthi Spark: A Modern Employee Innovation Management Platform
 
-Kaizen Ideas is a full-stack application that streamlines the process of collecting, reviewing, and implementing employee improvement ideas. The platform promotes continuous improvement by providing an intuitive interface for idea submission, tracking, and collaboration while offering robust analytics, leaderboard features, and a comprehensive credit points system to drive engagement.
+Sakthi Spark is a full-stack application that streamlines the process of collecting, reviewing, and implementing employee improvement ideas. The platform promotes continuous improvement by providing an intuitive interface for idea submission, tracking, and collaboration while offering robust analytics, leaderboard features, and a comprehensive credit points system.
 
-The application consists of a React Native mobile frontend and a Node.js/Express backend, enabling employees to easily submit improvement ideas across various categories including cost savings, safety, quality, and productivity. Reviewers and administrators can efficiently manage and track ideas through their implementation lifecycle, while built-in gamification features encourage participation through leaderboards, achievement tracking, and credit points rewards.
+## 🚀 Features
 
-## 🏆 Credit Points System
+### For Employees
+- 📝 **Easy Idea Submission**: Submit improvement ideas across various categories including cost savings, safety, quality, and productivity
+- 📊 **Real-time Tracking**: Monitor the status and progress of your submitted ideas
+- 🏆 **Gamification**: Earn credit points for submissions and achievements
+- 📱 **Mobile-First Design**: Access the platform seamlessly on any device
+- 🔔 **Notifications**: Stay updated on idea status changes and approvals
 
-The platform features a sophisticated credit points system that rewards users for their contributions and encourages continuous participation:
+### For Reviewers & Administrators
+- 📋 **Idea Management**: Efficiently review, approve, and track ideas through their implementation lifecycle
+- 📈 **Analytics Dashboard**: Comprehensive insights into idea submissions and implementation rates
+- 👥 **User Management**: Manage employee accounts and permissions
+- 🏅 **Leaderboard**: Track top contributors and encourage healthy competition
 
-### Points Allocation
-- **Idea Submission**: +10 points per submitted idea
-- **Idea Approval**: +20 points per approved idea  
-- **Idea Implementation**: +30 points per implemented idea
+## 🎯 Achievement System
 
-### Real-time Updates
-- Credit points are automatically calculated and updated in real-time
-- Profile page shows detailed breakdown of points earned
-- Notifications are sent when credit points change
-- Milestone achievements are celebrated with special notifications
-
-### Milestone System
-Users receive notifications for achieving milestones:
-- 🎯 First idea submitted
+### Submission Milestones
 - 🎯 5 ideas submitted
 - 🎯 10 ideas submitted
-- 🎯 First idea approved
+- 🎯 25 ideas submitted
+- 🎯 50 ideas submitted
+
+### Approval Milestones
 - 🎯 5 ideas approved
-- 🎯 First idea implemented
-- 🎯 100 credit points reached
-- 🎯 500 credit points reached
-- 🎯 1000 credit points reached
+- 🎯 10 ideas approved
+- 🎯 25 ideas approved
 
-### When Points Are Updated
-- **Idea Submission**: Points recalculated immediately
-- **Status Change**: Points updated when idea status changes to approved/implemented
-- **Idea Deletion**: Points recalculated after idea deletion
-- **Manual Recalculation**: Admin can trigger recalculation for all users
+## 🏗️ Architecture
 
-## Repository Structure
 ```
-.
-├── backend/                      # Node.js/Express backend application
-│   ├── src/
-│   │   ├── config/              # Configuration files (database connection)
-│   │   ├── controllers/         # Business logic for auth, ideas, users, notifications
-│   │   ├── middleware/          # Auth, validation middleware
-│   │   ├── models/             # Mongoose models for User, Idea, Notification
-│   │   ├── routes/             # API route definitions
-│   │   └── server.js           # Express application entry point
-│   └── scripts/
-│       └── seedData.js         # Database seeding script
-└── frontend/                    # React Native mobile application
-    ├── app/                     # Expo Router screens and layouts
-    │   ├── (tabs)/             # Tab-based navigation screens
-    │   └── _layout.js          # Root layout configuration
-    ├── context/                # React Context providers
-    ├── hooks/                  # Custom React hooks
-    └── utils/                  # Utility functions and theme configuration
+Sakthi_Auto/
+├── frontend/                 # React Native/Expo mobile app
+│   ├── app/                 # Main app screens and navigation
+│   │   ├── (tabs)/         # Tab-based navigation screens
+│   │   │   ├── index.js    # Home/Dashboard screen
+│   │   │   ├── submit.js   # Idea submission form
+│   │   │   ├── tracker.js  # Idea tracking and status
+│   │   │   ├── leaderboard.js # Leaderboard and achievements
+│   │   │   └── profile.js  # User profile and statistics
+│   │   └── login.js        # Authentication screen
+│   ├── context/            # React Context for state management
+│   │   ├── UserContext.js  # User authentication and data
+│   │   └── IdeaContext.js  # Ideas state management
+│   ├── hooks/              # Custom React hooks
+│   └── utils/              # Utility functions and API calls
+└── backend/                # Node.js/Express API server
+    ├── src/
+    │   ├── controllers/    # Business logic for auth, ideas, users, notifications
+    │   ├── models/         # MongoDB schemas and models
+    │   ├── routes/         # API route definitions
+    │   ├── middleware/     # Authentication and validation middleware
+    │   ├── services/       # External service integrations (Twilio, etc.)
+    │   └── config/         # Database and app configuration
+    ├── scripts/            # Database seeding and utility scripts
+    └── uploads/            # File upload storage
 ```
 
-## Usage Instructions
+## 🚀 Quick Start
+
 ### Prerequisites
-- Node.js v14.x or higher
-- MongoDB v4.x or higher
-- Expo CLI for mobile development
-- React Native development environment setup
+- Node.js (v16 or higher)
+- MongoDB (local or cloud)
+- Expo CLI (for mobile development)
+- Git
 
 ### Installation
 
-#### Quick Setup (Recommended)
-```bash
-# Clone the repository
-git clone <repository-url>
-cd Sakthi_Auto
-
-# Install all dependencies
-npm run install:all
-
-# Setup environment
-cd backend
-cp env.example .env
-# Edit .env with your MongoDB connection string and JWT secret
-
-# Start both frontend and backend
-npm run dev
-```
-
-#### Manual Setup
-
-##### Backend Setup
-```bash
-# Navigate to backend directory
-cd backend
-
-# Install dependencies
-npm install
-
-# Create .env file
-cp .env.example .env
-
-# Update environment variables
-# Edit .env with your MongoDB connection string and other configurations
-
-# Seed the database with sample data
-npm run seed
-
-# Start the development server
-npm run dev
-```
-
-##### Frontend Setup
-```bash
-# Navigate to frontend directory
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start the Expo development server
-npm start
-```
-
-### Available Scripts
-
-- `npm run dev` - Start both frontend and backend in development mode
-- `npm run start` - Start both frontend and backend in production mode
-- `npm run install:all` - Install dependencies for all packages
-- `npm run build` - Build the frontend for web deployment
-- `npm run test` - Run backend tests
-
-### Quick Start
-1. Access the application using the following test credentials:
-   ```
-   Employee: 12345 | OTP: 1234
-   Reviewer: 67890 | OTP: 1234
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd Sakthi_Auto
    ```
 
-2. Submit your first idea:
-   - Navigate to the "Submit" tab
-   - Fill in the idea details across the multi-step form
-   - Add supporting images if needed
-   - Submit for review
-   - **Earn 10 credit points immediately!**
+2. **Install dependencies**
+   ```bash
+   # Install root dependencies
+   npm install
+   
+   # Install backend dependencies
+   cd backend
+   npm install
+   
+   # Install frontend dependencies
+   cd ../frontend
+   npm install
+   ```
 
-3. Track your ideas and points:
-   - Use the "Tracker" tab to monitor your submitted ideas
-   - Check the "Profile" tab to see your credit points breakdown
-   - Filter ideas by status
-   - View detailed feedback from reviewers
+3. **Environment Setup**
+   ```bash
+   # Backend environment
+   cd backend
+   cp env.example .env
+   # Edit .env with your MongoDB URI and other configurations
+   
+   # Frontend environment (if needed)
+   cd ../frontend
+   # Configure any frontend-specific environment variables
+   ```
 
-## API Endpoints
+4. **Database Setup**
+   ```bash
+   cd backend
+   npm run seed
+   ```
+
+5. **Start the application**
+   ```bash
+   # Start backend server (from backend directory)
+   npm start
+   
+   # Start frontend (from frontend directory)
+   npx expo start
+   ```
+
+## 📱 Mobile App Usage
+
+### Getting Started
+1. **Login**: Use your employee credentials to access the platform
+2. **Submit Ideas**: Navigate to the "Submit" tab to create new improvement ideas
+3. **Track Progress**: Use the "Tracker" tab to monitor your submitted ideas
+4. **View Leaderboard**: Check the "Leaderboard" tab to see top contributors
+5. **Profile**: Access your profile to view statistics and achievements
+
+### Idea Submission Process
+1. Fill out the idea submission form with:
+   - Title and description
+   - Category (Cost Savings, Safety, Quality, Productivity)
+   - Expected impact and benefits
+   - Implementation timeline
+2. Submit the idea (+10 credit points)
+3. Track the review process through status updates
+4. Receive notifications on approval/rejection
+
+### Credit Points System
+- **Submission**: +10 points per idea
+- **Approval**: +20 points per approved idea
+- **Implementation**: +30 points per implemented idea
+- **Achievements**: Bonus points for milestone achievements
+
+## 🔧 API Endpoints
 
 ### Authentication
 - `POST /api/auth/login` - User login
-- `GET /api/auth/profile` - Get current user profile
 - `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user info
+
+### Users
+- `GET /api/users` - Get all users (admin only)
+- `GET /api/users/:id` - Get user by ID
+- `PUT /api/users/:id` - Update user
+- `DELETE /api/users/:id` - Delete user (admin only)
 
 ### Ideas
 - `GET /api/ideas` - Get all ideas (with filters)
@@ -163,27 +162,36 @@ npm start
 - `PUT /api/ideas/:id/status` - Update idea status (+20/+30 points)
 - `DELETE /api/ideas/:id` - Delete idea (recalculate points)
 
-### Users
-- `GET /api/users/leaderboard` - Get leaderboard
-- `POST /api/users/recalculate-credit-points` - Recalculate all users' credit points (Admin)
+### Notifications
+- `GET /api/notifications` - Get user notifications
+- `PUT /api/notifications/:id/read` - Mark notification as read
 
-## Credit Points Calculation
+## 🛠️ Development
 
-The credit points system automatically calculates points based on user actions:
-
-```javascript
-// Points calculation formula
-const creditPoints = (submitted * 10) + (approved * 20) + (implemented * 30);
+### Backend Development
+```bash
+cd backend
+npm run dev  # Start with nodemon for development
+npm test     # Run tests
+npm run seed # Seed database with sample data
 ```
 
-### Real-time Updates
-The frontend automatically refreshes user data when:
-- A new idea is submitted
-- An idea status is updated
-- An idea is deleted
-- User manually refreshes profile
+### Frontend Development
+```bash
+cd frontend
+npx expo start     # Start Expo development server
+npx expo start --web  # Start web version
+npx expo build     # Build for production
+```
 
-## Database Schema
+### Database Management
+```bash
+cd backend
+npm run seed       # Seed with sample data
+npm run reset-db   # Reset database (if available)
+```
+
+## 📊 Database Schema
 
 ### User Model
 ```javascript
@@ -192,12 +200,10 @@ The frontend automatically refreshes user data when:
   name: String,
   email: String,
   department: String,
-  designation: String,
   role: String,
-  creditPoints: Number, // Auto-calculated
-  isActive: Boolean,
-  createdAt: Date,
-  updatedAt: Date
+  creditPoints: Number,
+  achievements: Array,
+  createdAt: Date
 }
 ```
 
@@ -205,83 +211,101 @@ The frontend automatically refreshes user data when:
 ```javascript
 {
   title: String,
-  problem: String,
-  improvement: String,
-  benefit: String,
-  department: String,
-  estimatedSavings: Number,
-  status: String, // pending, approved, rejected, implemented
+  description: String,
+  category: String,
   submittedBy: ObjectId,
-  reviewedBy: ObjectId,
-  isActive: Boolean,
-  createdAt: Date,
-  updatedAt: Date
+  status: String,
+  reviewComments: String,
+  approvedBy: ObjectId,
+  approvedAt: Date,
+  implementedAt: Date,
+  createdAt: Date
 }
 ```
 
-## Data Flow
-The application follows a standard client-server architecture with RESTful API communication between the React Native frontend and Express backend.
+## 🔒 Security Features
 
-```ascii
-[Mobile Client] <--> [Express Server] <--> [MongoDB]
-     |                     |                  |
-User Interface    API & Business Logic    Data Storage
-     |                     |                  |
-Auth Context     JWT Authentication     User/Idea Data
-     |                     |                  |
-Credit Points    Real-time Updates      Points Calculation
-```
+- JWT-based authentication
+- Password hashing with bcrypt
+- Input validation and sanitization
+- Role-based access control
+- Rate limiting on API endpoints
 
-Key component interactions:
-1. User authentication via JWT tokens
-2. Real-time idea status updates
-3. Automatic credit points calculation
-4. Notification system for status changes and milestones
-5. File upload for supporting documentation
-6. Caching for improved performance
-7. Role-based access control
-8. Automated email notifications
-9. Analytics and reporting pipeline
-10. Leaderboard with credit points ranking
+## 📱 Mobile Features
 
-## Troubleshooting
-1. Database Connection Issues
-   - Error: "MongoDB Connection Failed"
-   - Solution: 
-     ```bash
-     # Check MongoDB service status
-     sudo service mongod status
-     
-     # Verify connection string in .env
-     MONGODB_URI=mongodb://localhost:27017/kaizen-ideas
-     ```
+- Offline capability for viewing submitted ideas
+- Push notifications for status updates
+- Camera integration for idea documentation
+- Biometric authentication support
+- Responsive design for all screen sizes
 
-2. Authentication Issues
-   - Error: "Invalid token"
-   - Solution: Clear local storage and re-login
-   ```javascript
-   // In browser console or React Native
-   await AsyncStorage.clear()
-   ```
+## 🚀 Deployment
 
-3. Credit Points Not Updating
-   - Check if the idea status was properly updated
-   - Verify the user has proper permissions
-   - Try refreshing the profile page
-   - Check server logs for calculation errors
+### Backend Deployment
+1. Set up MongoDB Atlas or local MongoDB
+2. Configure environment variables
+3. Deploy to Heroku, Vercel, or your preferred platform
+4. Set up CI/CD pipeline
 
-## Contributing
+### Mobile App Deployment
+1. Build the app using Expo
+2. Submit to App Store/Google Play Store
+3. Configure push notifications
+4. Set up app analytics
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
+4. Add tests if applicable
 5. Submit a pull request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Support
+## 🆘 Support
 
-For support and questions, please contact the development team or create an issue in the repository.
+For support and questions:
+- Create an issue in the repository
+- Contact the development team
+- Check the documentation
+
+## 🔄 Environment Variables
+
+### Backend (.env)
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/sakthi-spark
+JWT_SECRET=your_jwt_secret_here
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+TWILIO_PHONE_NUMBER=your_twilio_phone
+```
+
+### Frontend (if needed)
+```env
+API_BASE_URL=http://localhost:5000/api
+EXPO_PUBLIC_API_URL=http://localhost:5000/api
+```
+
+## 📈 Performance Optimization
+
+- Database indexing for faster queries
+- Image compression and optimization
+- Lazy loading for large datasets
+- Caching strategies for frequently accessed data
+- CDN integration for static assets
+
+## 🔍 Monitoring and Analytics
+
+- Error tracking with Sentry
+- Performance monitoring
+- User analytics and behavior tracking
+- Database performance monitoring
+- API usage analytics
+
+---
+
+**Sakthi Spark** - Empowering continuous improvement through employee innovation! 🚀

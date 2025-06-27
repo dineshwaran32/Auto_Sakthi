@@ -5,7 +5,7 @@ const Notification = require('../src/models/Notification');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect("mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Kaizen_Idea?retryWrites=true&w=majority&appName=Cluster0");
+    await mongoose.connect("mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Sakthi_Spark?retryWrites=true&w=majority&appName=Cluster0");
     console.log('MongoDB Connected for seeding');
   } catch (error) {
     console.error('Database connection failed:', error);
@@ -219,7 +219,7 @@ if (require.main === module) {
 module.exports = { seedDatabase };
 
 async function recalculateAllUserCreditPoints() {
-  await mongoose.connect("mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Kaizen_Idea?retryWrites=true&w=majority&appName=Cluster0"); 
+  await mongoose.connect("mongodb+srv://vithack28:vithack28@cluster0.cq6gr.mongodb.net/Sakthi_Spark?retryWrites=true&w=majority&appName=Cluster0"); 
   const users = await User.find({});
   for (const user of users) {
     const ideas = await Idea.find({ submittedBy: user._id, isActive: { $ne: false } });

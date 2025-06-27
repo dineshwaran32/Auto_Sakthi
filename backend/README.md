@@ -1,166 +1,99 @@
-# Kaizen Ideas Backend API
+# Sakthi Spark Backend API
 
-A robust Node.js/Express backend API for the Kaizen Ideas continuous improvement platform with MongoDB integration.
+A robust Node.js/Express backend API for the Sakthi Spark continuous improvement platform with MongoDB integration.
 
-## 🚀 Features
+## Features
 
-- **User Management**: Authentication, authorization, and user profiles
-- **Idea Management**: Submit, review, and track improvement ideas
-- **Notifications**: Real-time notifications for idea status updates
-- **Leaderboards**: Individual and department-based rankings
-- **Statistics**: Comprehensive analytics and reporting
-- **Security**: JWT authentication, rate limiting, input validation
-- **File Upload**: Support for idea attachments and images
+- **User Authentication**: JWT-based authentication with role-based access control
+- **Idea Management**: CRUD operations for employee improvement ideas
+- **Credit Points System**: Automated calculation and tracking of user points
+- **Notification System**: Real-time notifications for status changes and milestones
+- **File Upload**: Support for image uploads with validation
+- **SMS Integration**: Twilio integration for OTP verification
+- **Leaderboard**: User ranking based on credit points
+- **Achievement System**: Milestone tracking and notifications
 
-## 📋 Prerequisites
+## API Endpoints
 
-- Node.js (v16 or higher)
-- MongoDB (v4.4 or higher)
-- npm or yarn
+### Authentication
+- `POST /api/auth/login` - User login with OTP verification
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user profile
 
-## 🛠️ Installation
+### Users
+- `GET /api/users` - Get all users (admin only)
+- `GET /api/users/leaderboard` - Get leaderboard
+- `POST /api/users/recalculate-credit-points` - Recalculate all users' credit points (Admin)
+- `PUT /api/users/:id` - Update user profile
+- `DELETE /api/users/:id` - Delete user (admin only)
 
-1. **Clone and navigate to backend directory**:
+### Ideas
+- `GET /api/ideas` - Get all ideas (with filters)
+- `POST /api/ideas` - Submit new idea (+10 points)
+- `GET /api/ideas/my` - Get user's own ideas
+- `PUT /api/ideas/:id/status` - Update idea status (+20/+30 points)
+- `PUT /api/ideas/:id` - Update idea details
+- `DELETE /api/ideas/:id` - Delete idea (recalculate points)
+
+### Notifications
+- `GET /api/notifications` - Get user notifications
+- `PUT /api/notifications/:id/read` - Mark notification as read
+
+## Installation
+
+1. **Clone the repository**
    ```bash
+   git clone <repository-url>
    cd backend
    ```
 
-2. **Install dependencies**:
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Environment Setup**:
+3. **Environment Setup**
    ```bash
-   cp .env.example .env
-   ```
-   
-   Update the `.env` file with your configuration:
-   ```env
-   MONGODB_URI=mongodb://localhost:27017/kaizen_ideas
-   JWT_SECRET=your_super_secret_jwt_key_here
-   PORT=3000
-   NODE_ENV=development
+   cp env.example .env
+   # Edit .env with your configurations
    ```
 
-4. **Start MongoDB** (if running locally):
+4. **Database Setup**
    ```bash
-   mongod
+   npm run seed
    ```
 
-5. **Seed the database** (optional):
+5. **Start the server**
    ```bash
-   node scripts/seedData.js
-   ```
-
-6. **Start the server**:
-   ```bash
-   # Development mode with auto-reload
-   npm run dev
-   
-   # Production mode
    npm start
    ```
 
-## 📚 API Documentation
+## Environment Variables
 
-### Base URL
-```
-http://localhost:3000/api
-```
+Create a `.env` file in the backend directory:
 
-### Authentication
-
-#### Login
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "employeeNumber": "12345",
-  "otp": "1234"
-}
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/sakthi-spark
+JWT_SECRET=your_jwt_secret_here
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+TWILIO_PHONE_NUMBER=your_twilio_phone
 ```
 
-#### Get Profile
-```http
-GET /api/auth/profile
-Authorization: Bearer <token>
-```
-
-### Ideas
-
-#### Create Idea
-```http
-POST /api/ideas
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "title": "Improve Process Efficiency",
-  "problem": "Current process is slow and inefficient",
-  "improvement": "Implement automation to speed up the process",
-  "benefit": "productivity",
-  "estimatedSavings": 25000,
-  "department": "Engineering"
-}
-```
-
-#### Get Ideas
-```http
-GET /api/ideas?page=1&limit=10&status=approved&department=Engineering
-Authorization: Bearer <token>
-```
-
-#### Get My Ideas
-```http
-GET /api/ideas/my?page=1&limit=10
-Authorization: Bearer <token>
-```
-
-### Users
-
-#### Get Leaderboard
-```http
-GET /api/users/leaderboard?type=individual
-Authorization: Bearer <token>
-```
-
-#### Get Users (Admin only)
-```http
-GET /api/users?page=1&limit=10&department=Engineering
-Authorization: Bearer <token>
-```
-
-### Notifications
-
-#### Get Notifications
-```http
-GET /api/notifications?page=1&limit=20&isRead=false
-Authorization: Bearer <token>
-```
-
-#### Mark as Read
-```http
-PUT /api/notifications/:id/read
-Authorization: Bearer <token>
-```
-
-## 🗄️ Database Schema
+## Database Schema
 
 ### User Model
 ```javascript
 {
-  employeeNumber: String (unique),
+  employeeNumber: String,
   name: String,
-  email: String (unique),
+  email: String,
   department: String,
-  designation: String,
-  role: String (employee|reviewer|admin),
-  isActive: Boolean,
-  lastLogin: Date,
-  createdAt: Date,
-  updatedAt: Date
+  role: String,
+  creditPoints: Number,
+  achievements: Array,
+  createdAt: Date
 }
 ```
 
@@ -168,130 +101,119 @@ Authorization: Bearer <token>
 ```javascript
 {
   title: String,
-  problem: String,
-  improvement: String,
-  benefit: String (cost_saving|safety|quality|productivity),
-  estimatedSavings: Number,
-  department: String,
-  submittedBy: ObjectId (User),
-  submittedByEmployeeNumber: String,
-  status: String (under_review|approved|rejected|implementing|implemented),
-  reviewedBy: ObjectId (User),
-  reviewedAt: Date,
+  description: String,
+  category: String,
+  submittedBy: ObjectId,
+  status: String,
   reviewComments: String,
-  implementationDate: Date,
-  actualSavings: Number,
-  images: Array,
-  tags: Array,
-  priority: String,
-  createdAt: Date,
-  updatedAt: Date
+  approvedBy: ObjectId,
+  approvedAt: Date,
+  implementedAt: Date,
+  createdAt: Date
 }
 ```
 
 ### Notification Model
 ```javascript
 {
-  recipient: ObjectId (User),
-  recipientEmployeeNumber: String,
-  type: String,
+  userId: ObjectId,
   title: String,
   message: String,
-  relatedIdea: ObjectId (Idea),
+  type: String,
   isRead: Boolean,
-  readAt: Date,
   createdAt: Date
 }
 ```
 
-## 🔐 Authentication & Authorization
+## Credit Points System
 
-The API uses JWT (JSON Web Tokens) for authentication:
+The platform features an automated credit points system:
 
-1. **Login** with employee number and OTP to receive a token
-2. **Include token** in Authorization header: `Bearer <token>`
-3. **Role-based access**: Different endpoints require different roles
-   - `employee`: Basic access to submit and view own ideas
-   - `reviewer`: Can review and update idea status
-   - `admin`: Full access to all features
+### Points Allocation
+- **Idea Submission**: +10 points per submitted idea
+- **Idea Approval**: +20 points per approved idea
+- **Idea Implementation**: +30 points per implemented idea
 
-## 🧪 Testing Credentials
+### Milestone Achievements
+- First idea submitted
+- 5/10/25/50 ideas submitted
+- First idea approved
+- 5/10/25 ideas approved
+- First idea implemented
+- 100/500/1000 credit points reached
 
-After running the seed script, use these credentials:
+## Test Data
 
-| Role | Employee Number | OTP | Description |
-|------|----------------|-----|-------------|
-| Employee | 12345 | 1234 | John Doe - Senior Engineer |
-| Reviewer | 67890 | 1234 | Jane Smith - Quality Manager |
-| Admin | 11111 | 1234 | Admin User - Kaizen Coordinator |
+The seeding script creates sample users:
 
-## 🔧 Development
+| Employee Number | OTP | Role | Description |
+|----------------|-----|------|-------------|
+| 12345 | 1234 | Employee | Regular employee user |
+| 67890 | 1234 | Reviewer | Reviewer with approval rights |
+| 11111 | 1234 | Admin | Admin User - Sakthi Spark Coordinator |
 
-### Available Scripts
+## Development
 
 ```bash
-npm start          # Start production server
-npm run dev        # Start development server with nodemon
-npm test           # Run tests
+# Start with nodemon for development
+npm run dev
+
+# Run tests
+npm test
+
+# Seed database
+npm run seed
+
+# Reset database
+npm run reset-db
 ```
 
-### Project Structure
+## Production Deployment
 
-```
-backend/
-├── src/
-│   ├── config/         # Database and app configuration
-│   ├── controllers/    # Route handlers
-│   ├── middleware/     # Custom middleware
-│   ├── models/         # MongoDB models
-│   └── routes/         # API routes
-├── scripts/            # Utility scripts
-├── uploads/            # File upload directory
-├── .env               # Environment variables
-└── package.json       # Dependencies and scripts
-```
+1. **Set up MongoDB Atlas**
+   ```bash
+   # Update MONGODB_URI in .env
+   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/sakthi-spark
+   ```
 
-## 🚀 Deployment
+2. **Configure environment variables**
+   - Set production JWT_SECRET
+   - Configure Twilio credentials
+   - Set appropriate PORT
 
-### Environment Variables for Production
+3. **Deploy to your preferred platform**
+   - Heroku
+   - Vercel
+   - AWS
+   - DigitalOcean
 
-```env
-NODE_ENV=production
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/kaizen_ideas
-JWT_SECRET=your_super_secure_production_secret
-PORT=3000
-ALLOWED_ORIGINS=https://your-frontend-domain.com
-```
+## Security Features
 
-### Docker Deployment (Optional)
+- JWT-based authentication
+- Password hashing with bcrypt
+- Input validation and sanitization
+- Role-based access control
+- Rate limiting on API endpoints
+- CORS configuration
 
-```dockerfile
-FROM node:16-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-EXPOSE 3000
-CMD ["npm", "start"]
-```
+## Error Handling
 
-## 📊 Monitoring & Logging
+The API includes comprehensive error handling:
 
-- **Health Check**: `GET /health`
-- **Request Logging**: Morgan middleware
-- **Error Handling**: Global error handler
-- **Rate Limiting**: 100 requests per 15 minutes per IP
+- Validation errors with detailed messages
+- Authentication and authorization errors
+- Database connection errors
+- File upload errors
+- SMS service errors
 
-## 🔒 Security Features
+## Monitoring and Logging
 
-- **Helmet**: Security headers
-- **CORS**: Cross-origin resource sharing
-- **Rate Limiting**: Prevent abuse
-- **Input Validation**: Joi schema validation
-- **JWT Authentication**: Secure token-based auth
-- **Password Hashing**: bcrypt for sensitive data
+- Request/response logging
+- Error logging with stack traces
+- Performance monitoring
+- Database query logging
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -299,6 +221,6 @@ CMD ["npm", "start"]
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.

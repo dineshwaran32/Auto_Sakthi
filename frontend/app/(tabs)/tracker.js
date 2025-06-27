@@ -196,7 +196,7 @@ export default function TrackerScreen() {
       </Text>
       <Text variant="bodyMedium" style={styles.emptyText}>
         {statusFilter === 'all' 
-          ? "You haven't submitted any ideas yet. Start your Kaizen journey today!"
+          ? "You haven't submitted any ideas yet. Start your Sakthi Spark journey today!"
           : `No ideas with "${STATUS_FILTERS.find(f => f.value === statusFilter)?.label}" status found.`
         }
       </Text>
